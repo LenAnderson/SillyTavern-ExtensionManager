@@ -362,7 +362,7 @@ const init = async()=>{
             const updateExtensionList = (async()=>{
                 body.innerHTML = '';
                 const response = await fetch('/api/extensions/discover');
-                const names = await response.json();
+                const names = (await response.json()).map(it=>it.name);
                 manifests = await Promise.all(names.map(async(name)=>{
                     const response = await fetch(`/scripts/extensions/${name}/manifest.json`);
                     if (!response.ok) {
