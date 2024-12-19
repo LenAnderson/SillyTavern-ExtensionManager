@@ -319,7 +319,6 @@ const init = async()=>{
             tabs.append(tabCatalog);
         }
         const tabManual = document.createElement('div'); {
-            tabTab.config = tabManual;
             tabManual.classList.add('stem--tab');
             tabManual.classList.add('stem--button');
             tabManual.classList.add('stem--tabManual');
