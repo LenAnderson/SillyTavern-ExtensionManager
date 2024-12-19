@@ -215,6 +215,25 @@
 		}
 	}
 
+    &.stem--raw {
+        flex-direction: column;
+        .stem--actions {
+            display: flex;
+            gap: 1em;
+            justify-content: flex-start;
+            align-items: baseline;
+            .text_pole {
+                width: auto;
+            }
+            .stem--sep {
+                flex: 1 1 auto;
+            }
+        }
+        textarea {
+            flex: 1 1 auto;
+        }
+    }
+
     &.stem--config {
         flex-direction: column;
         .stem--actions {

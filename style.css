@@ -186,6 +186,24 @@
   gap: 0.5em;
   padding: 0 0.25em;
 }
+.stem--body.stem--raw {
+  flex-direction: column;
+}
+.stem--body.stem--raw .stem--actions {
+  display: flex;
+  gap: 1em;
+  justify-content: flex-start;
+  align-items: baseline;
+}
+.stem--body.stem--raw .stem--actions .text_pole {
+  width: auto;
+}
+.stem--body.stem--raw .stem--actions .stem--sep {
+  flex: 1 1 auto;
+}
+.stem--body.stem--raw textarea {
+  flex: 1 1 auto;
+}
 .stem--body.stem--config {
   flex-direction: column;
 }

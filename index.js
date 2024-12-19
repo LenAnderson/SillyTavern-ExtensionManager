@@ -220,6 +220,8 @@ const init = async()=>{
         /**@type {HTMLElement} */
         catalog: undefined,
         /**@type {HTMLElement} */
+        raw: undefined,
+        /**@type {HTMLElement} */
         config: undefined,
     };
     const tabBody = {
@@ -231,6 +233,8 @@ const init = async()=>{
         plugins: undefined,
         /**@type {HTMLElement} */
         catalog: undefined,
+        /**@type {HTMLElement} */
+        raw: undefined,
         /**@type {HTMLElement} */
         config: undefined,
     };
@@ -336,6 +340,20 @@ const init = async()=>{
         const sep = document.createElement('div'); {
             sep.classList.add('stem--sep');
             tabs.append(sep);
+        }
+        const tabRaw = document.createElement('div'); {
+            tabTab.raw = tabRaw;
+            tabRaw.classList.add('stem--tab');
+            tabRaw.classList.add('stem--tabRaw');
+            tabRaw.title = 'Edit extension settings JSON';
+            const i = document.createElement('i'); {
+                i.classList.add('fa-solid', 'fa-fw', 'fa-pen-to-square');
+                tabRaw.append(i);
+            }
+            tabRaw.addEventListener('click', async()=>{
+                await goToTab('raw');
+            });
+            tabs.append(tabRaw);
         }
         const tabConfig = document.createElement('div'); {
             tabTab.config = tabConfig;
@@ -956,6 +974,109 @@ const init = async()=>{
             };
             updates.catalog = updateCatalog;
             updateCatalog();
+            drawer.append(body);
+        }
+    }
+    { // raw / JSON
+        const body = document.createElement('div'); {
+            tabBody.raw = body;
+            body.classList.add('stem--body');
+            body.classList.add('stem--raw');
+            let pre;
+            let picker;
+            const putConfig = ()=>{
+                if (!pre || !picker) return;
+                const extensionKey = picker.value;
+                pre.value = '';
+                if (extensionKey?.length) {
+                    pre.value = JSON.stringify(extension_settings[extensionKey], null, '\t');
+                }
+            };
+            const actions = document.createElement('div'); {
+                actions.classList.add('stem--actions');
+                { // picker
+                    const populatePicker = ()=>{
+                        const val = picker.value;
+                        picker.innerHTML = '';
+                        picker.addEventListener('change', ()=>putConfig());
+                        const blank = document.createElement('option'); {
+                            blank.value = '';
+                            blank.textContent = '-- Select an extension --';
+                            picker.append(blank);
+                        }
+                        for (const key of Object.keys(extension_settings).toSorted((a,b)=>a.toLowerCase().localeCompare(b.toLowerCase()))) {
+                            const opt = document.createElement('option'); {
+                                opt.value = key;
+                                opt.textContent = key;
+                                picker.append(opt);
+                            }
+                        }
+                        picker.value = val;
+                        putConfig();
+                    };
+                    picker = document.createElement('select'); {
+                        picker.classList.add('text_pole');
+                        populatePicker();
+                        actions.append(picker);
+                    }
+                    const pickerRefresh = document.createElement('div'); {
+                        pickerRefresh.classList.add('menu_button');
+                        pickerRefresh.classList.add('fa-solid', 'fa-fw', 'fa-rotate-left');
+                        pickerRefresh.addEventListener('click', ()=>populatePicker());
+                        actions.append(pickerRefresh);
+                    }
+                }
+                const sep = document.createElement('div'); {
+                    sep.classList.add('stem--sep');
+                    actions.append(sep);
+                }
+                const reset = document.createElement('div'); {
+                    reset.classList.add('menu_button');
+                    reset.classList.add('menu_button_icon');
+                    reset.addEventListener('click', ()=>putConfig());
+                    const i = document.createElement('i'); {
+                        i.classList.add('fa-solid', 'fa-fw', 'fa-rotate-left');
+                        reset.append(i);
+                    }
+                    const t = document.createElement('span'); {
+                        t.textContent = 'Reset';
+                        t.title = 'Reset to last saved state';
+                        reset.append(t);
+                    }
+                    actions.append(reset);
+                }
+                const save = document.createElement('div'); {
+                    save.classList.add('menu_button');
+                    save.classList.add('menu_button_icon');
+                    save.addEventListener('click', ()=>{
+                        try {
+                            if (!picker?.value?.length) return;
+                            const parsed = JSON.parse(pre.value);
+                            extension_settings[picker.value] = parsed;
+                            saveSettingsDebounced();
+                            toastr.success('Config saved');
+                        } catch (ex) {
+                            alert(ex);
+                        }
+                    });
+                    const i = document.createElement('i'); {
+                        i.classList.add('fa-solid', 'fa-fw', 'fa-save');
+                        save.append(i);
+                    }
+                    const t = document.createElement('span'); {
+                        t.textContent = 'Save';
+                        t.title = 'Save changes';
+                        save.append(t);
+                    }
+                    actions.append(save);
+                }
+                body.append(actions);
+            }
+            pre = document.createElement('textarea'); {
+                dom.config.textarea = pre;
+                putConfig();
+                body.append(pre);
+            }
             drawer.append(body);
         }
     }
