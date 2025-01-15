@@ -373,3 +373,23 @@ body .popup .stem--readme {
 	padding: 0;
 	text-align: left;
 }
+
+
+.stem--reloadWarning {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    background-color: rgb(255 0 0 / 0.5);
+    color: white;
+    pointer-events: none;
+    text-align: center;
+    font-weight: bold;
+    z-index: 60000;
+    transform: scaleY(0);
+    transition: 200ms;
+    transform-origin: top center;
+    body:has(.stem--mustReload) & {
+        transform: scaleY(1);
+    }
+}

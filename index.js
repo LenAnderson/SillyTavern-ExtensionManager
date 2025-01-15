@@ -203,6 +203,13 @@ const init = async()=>{
     settingsBody.classList.add('stem--active');
     header.classList.add('stem--head');
 
+    // reload warning
+    const warning = document.createElement('div'); {
+        warning.classList.add('stem--reloadWarning');
+        warning.textContent = 'Reload the page to apply extension changes';
+        document.body.append(warning);
+    }
+
     const goToTab = async(key)=>{
         for (const [k, v] of Object.entries(tabBody)) {
             if (k == key) continue;
