@@ -1,7 +1,6 @@
 import { event_types, eventSource, getRequestHeaders, reloadMarkdownProcessor, saveSettingsDebounced } from '../../../../script.js';
 import { disableExtension, enableExtension, extension_settings, openThirdPartyExtensionMenu } from '../../../extensions.js';
 import { Popup, POPUP_TYPE } from '../../../popup.js';
-import { executeSlashCommandsWithOptions } from '../../../slash-commands.js';
 import { delay } from '../../../utils.js';
 
 class Repository {
