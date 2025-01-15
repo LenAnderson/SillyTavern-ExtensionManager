@@ -188,6 +188,7 @@ const processPluginQueue = async()=>{
 
 const init = async()=>{
     const pluginTest = await fetch('/api/plugins/emp/');
+    if (!pluginTest.ok) {
         Popup.show.text('Extension Manager', '<strong>Dependency Missing!</strong><br>Extension Manager requires the server plugin Extension Manager Plugin');
         return;
     }
