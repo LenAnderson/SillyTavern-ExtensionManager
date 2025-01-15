@@ -80,6 +80,8 @@ const appReady = new Promise(resolve=>eventSource.once(event_types.APP_READY, re
         isDisabledNow:boolean,
         isUpToDate:boolean,
         isUpdated:boolean,
+
+        tblRow:HTMLElement,
     }[]} */
 let manifests = [];
 
@@ -185,6 +187,10 @@ const processPluginQueue = async()=>{
 
 
 const init = async()=>{
+    const pluginTest = await fetch('/api/plugins/emp/');
+        Popup.show.text('Extension Manager', '<strong>Dependency Missing!</strong><br>Extension Manager requires the server plugin Extension Manager Plugin');
+        return;
+    }
     const drawer = /**@type {HTMLElement}*/(document.querySelector('#rm_extensions_block'));
     const settingsBody = /**@type {HTMLElement}*/(drawer.querySelector(':scope > .extensions_block'));
     const header = /**@type {HTMLElement}*/(settingsBody.children[0]);
@@ -375,8 +381,218 @@ const init = async()=>{
             tabBody.extensions = body;
             body.classList.add('stem--body');
             body.classList.add('stem--manageExtensions');
+            const filterPanel = document.createElement('div'); {
+                filterPanel.classList.add('stem--filters');
+                const search = document.createElement('label'); {
+                    search.classList.add('stem--search');
+                    const lbl = document.createElement('div'); {
+                        lbl.textContent = 'Search:';
+                        search.append(lbl);
+                    }
+                    const inp = document.createElement('input'); {
+                        inp.classList.add('text_pole');
+                        inp.type = 'search';
+                        inp.placeholder = 'Search extensions';
+                        inp.setAttribute('data-stem--filter', 'query');
+                        inp.addEventListener('input', ()=>{
+                            for (const manifest of manifests) {
+                                const show = inp.value.length == 0 || manifest.display_name.toLowerCase().includes(inp.value.toLowerCase());
+                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                const cur = filter.includes(inp.getAttribute('data-stem--filter'));
+                                if (!show) {
+                                    if (!cur) {
+                                        filter.push(inp.getAttribute('data-stem--filter'));
+                                    }
+                                } else if (cur) {
+                                    filter.splice(filter.indexOf(inp.getAttribute('data-stem--filter')), 1);
+                                }
+                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                            }
+                        });
+                        search.append(inp);
+                    }
+                    filterPanel.append(search);
+                }
+                const filterEnabled = document.createElement('label'); {
+                    filterEnabled.classList.add('stem--filter');
+                    const cb = document.createElement('input'); {
+                        cb.type = 'checkbox';
+                        cb.checked = true;
+                        cb.setAttribute('data-stem--filter', 'Enabled');
+                        cb.addEventListener('click', ()=>{
+                            for (const manifest of manifests) {
+                                const show = !manifest.isDisabledNow;
+                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                if (!cb.checked && show) {
+                                    if (!cur) {
+                                        filter.push(cb.getAttribute('data-stem--filter'));
+                                    }
+                                } else if (cur) {
+                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                }
+                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                            }
+                        });
+                        filterEnabled.append(cb);
+                    }
+                    const lbl = document.createElement('div'); {
+                        lbl.textContent = 'Enabled';
+                        filterEnabled.append(lbl);
+                    }
+                    filterPanel.append(filterEnabled);
+                }
+                const filterDisabled = document.createElement('label'); {
+                    filterDisabled.classList.add('stem--filter');
+                    const cb = document.createElement('input'); {
+                        cb.type = 'checkbox';
+                        cb.checked = true;
+                        cb.setAttribute('data-stem--filter', 'Disabled');
+                        cb.addEventListener('click', ()=>{
+                            for (const manifest of manifests) {
+                                const show = manifest.isDisabledNow;
+                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                if (!cb.checked && show) {
+                                    if (!cur) {
+                                        filter.push(cb.getAttribute('data-stem--filter'));
+                                    }
+                                } else if (cur) {
+                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                }
+                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                            }
+                        });
+                        filterDisabled.append(cb);
+                    }
+                    const lbl = document.createElement('div'); {
+                        lbl.textContent = 'Disabled';
+                        filterDisabled.append(lbl);
+                    }
+                    filterPanel.append(filterDisabled);
+                }
+                const filterUpdated = document.createElement('label'); {
+                    filterUpdated.classList.add('stem--filter');
+                    const cb = document.createElement('input'); {
+                        cb.type = 'checkbox';
+                        cb.checked = true;
+                        cb.setAttribute('data-stem--filter', 'Updated');
+                        cb.addEventListener('click', ()=>{
+                            for (const manifest of manifests) {
+                                const show = manifest.isUpToDate;
+                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                if (!cb.checked && show) {
+                                    if (!cur) {
+                                        filter.push(cb.getAttribute('data-stem--filter'));
+                                    }
+                                } else if (cur) {
+                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                }
+                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                            }
+                        });
+                        filterUpdated.append(cb);
+                    }
+                    const lbl = document.createElement('div'); {
+                        lbl.textContent = 'Updated';
+                        filterUpdated.append(lbl);
+                    }
+                    filterPanel.append(filterUpdated);
+                }
+                const filterHasUpdate = document.createElement('label'); {
+                    filterHasUpdate.classList.add('stem--filter');
+                    const cb = document.createElement('input'); {
+                        cb.type = 'checkbox';
+                        cb.checked = true;
+                        cb.setAttribute('data-stem--filter', 'HasUpdate');
+                        cb.addEventListener('click', ()=>{
+                            for (const manifest of manifests) {
+                                const show = !manifest.isUpToDate;
+                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                if (!cb.checked && show) {
+                                    if (!cur) {
+                                        filter.push(cb.getAttribute('data-stem--filter'));
+                                    }
+                                } else if (cur) {
+                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                }
+                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                            }
+                        });
+                        filterHasUpdate.append(cb);
+                    }
+                    const lbl = document.createElement('div'); {
+                        lbl.textContent = 'Has update';
+                        filterHasUpdate.append(lbl);
+                    }
+                    filterPanel.append(filterHasUpdate);
+                }
+                const filterCore = document.createElement('label'); {
+                    filterCore.classList.add('stem--filter');
+                    const cb = document.createElement('input'); {
+                        cb.type = 'checkbox';
+                        cb.checked = true;
+                        cb.setAttribute('data-stem--filter', 'Core');
+                        cb.addEventListener('click', ()=>{
+                            for (const manifest of manifests) {
+                                const show = manifest.isCore;
+                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                if (!cb.checked && show) {
+                                    if (!cur) {
+                                        filter.push(cb.getAttribute('data-stem--filter'));
+                                    }
+                                } else if (cur) {
+                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                }
+                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                            }
+                        });
+                        filterCore.append(cb);
+                    }
+                    const lbl = document.createElement('div'); {
+                        lbl.textContent = 'Core';
+                        filterCore.append(lbl);
+                    }
+                    filterPanel.append(filterCore);
+                }
+                const filterThirdParty = document.createElement('label'); {
+                    filterThirdParty.classList.add('stem--filter');
+                    const cb = document.createElement('input'); {
+                        cb.type = 'checkbox';
+                        cb.checked = true;
+                        cb.setAttribute('data-stem--filter', 'ThirdParty');
+                        cb.addEventListener('click', ()=>{
+                            for (const manifest of manifests) {
+                                const show = !manifest.isCore;
+                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                if (!cb.checked && show) {
+                                    if (!cur) {
+                                        filter.push(cb.getAttribute('data-stem--filter'));
+                                    }
+                                } else if (cur) {
+                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                }
+                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                            }
+                        });
+                        filterThirdParty.append(cb);
+                    }
+                    const lbl = document.createElement('div'); {
+                        lbl.textContent = 'Third-party';
+                        filterThirdParty.append(lbl);
+                    }
+                    filterPanel.append(filterThirdParty);
+                }
+                body.append(filterPanel);
+            }
+            let tbl;
+            let tblBody;
             const updateExtensionList = (async()=>{
-                body.innerHTML = '';
+                tbl?.remove();
                 const response = await fetch('/api/extensions/discover');
                 const names = (await response.json()).map(it=>it.name);
                 manifests = await Promise.all(names.map(async(name)=>{
@@ -396,8 +612,7 @@ const init = async()=>{
                     if (!a.isCore && b.isCore) return 1;
                     return a.display_name.toLowerCase().localeCompare(b.display_name.toLowerCase());
                 });
-                let tblBody;
-                const tbl = document.createElement('table'); {
+                tbl = document.createElement('table'); {
                     tbl.classList.add('stem--table');
                     const thead = document.createElement('thead'); {
                         for (const col of ['Extension', 'Source', 'Version', 'Author', 'URL', 'Actions']) {
@@ -440,6 +655,7 @@ const init = async()=>{
                         item.classList.add('stem--item');
                         if (manifest.isCore) item.classList.add('stem--isCore');
                         if (manifest.isDisabled) item.classList.add('stem--isDisabled');
+                        manifest.tblRow = item;
                         const name = document.createElement('td'); {
                             name.dataset.property = 'Name';
                             name.textContent = manifest.display_name;
@@ -629,7 +845,7 @@ const init = async()=>{
             body.classList.add('stem--managePlugins');
             const updatePluginList = (async()=>{
                 body.innerHTML = '';
-                const listResponse = await fetch('/api/plugins/pluginmanager/list');
+                const listResponse = await fetch('/api/plugins/emp/plugins/list');
                 if (!listResponse.ok) {
                     return 'Something went wrong';
                 }
@@ -702,7 +918,7 @@ const init = async()=>{
                                         if (isUpToDate === null) {
                                             data = await queueCheckPluginForUpdate(plugin.name);
                                         } else {
-                                            const response = await fetch('/api/plugins/pluginmanager/repo', {
+                                            const response = await fetch('/api/plugins/emp/plugins/repo', {
                                                 method: 'POST',
                                                 headers: getRequestHeaders(),
                                                 body: JSON.stringify({ plugin:plugin.name }),
@@ -746,7 +962,7 @@ const init = async()=>{
                                         i.classList.remove('fa-download');
                                         i.classList.add('fa-spinner', 'fa-spin-pulse');
                                         update.title = 'Updating...';
-                                        const response = await fetch('/api/plugins/pluginmanager/update', {
+                                        const response = await fetch('/api/plugins/emp/plugins/update', {
                                             method: 'POST',
                                             headers: getRequestHeaders(),
                                             body: JSON.stringify({ plugin:plugin.name }),
@@ -786,7 +1002,7 @@ const init = async()=>{
                                     del.title = 'Remove plugin';
                                     del.addEventListener('click', async()=>{
                                         item.classList.add('stem--isBusy');
-                                        await fetch('/api/plugins/pluginmanager/uninstall', {
+                                        await fetch('/api/plugins/emp/plugins/uninstall', {
                                             method: 'POST',
                                             headers: getRequestHeaders(),
                                             body: JSON.stringify({ plugin:plugin.name }),
@@ -894,41 +1110,9 @@ const init = async()=>{
                                     readme.classList.add('menu_button');
                                     readme.classList.add('fa-solid', 'fa-fw', 'fa-file-text');
                                     readme.addEventListener('click', async()=>{
-                                        // const readmeUrl = new URL(ext.url);
-                                        // readmeUrl.host = 'api.github.com';
-                                        // readmeUrl.pathname = `/repos${readmeUrl.pathname}/readme`;
-                                        // let baseUrl = '';
-                                        // let md = `
-                                        //     ## No README found.
-
-                                        //     Visit [GitHub](${ext.url}) for details.
-                                        // `.split('\n').map(it=>it.trim()).join('\n');
-                                        // try {
-                                        //     const response = await fetch(readmeUrl);
-                                        //     if (response.ok) {
-                                        //         const data = await response.json();
-                                        //         md = decodeURIComponent(
-                                        //             atob(data.content)
-                                        //                 .split('')
-                                        //                 .map(char=>`%${`00${char.charCodeAt(0).toString(16)}`.slice(-2)}`)
-                                        //                 .join(''),
-                                        //         );
-                                        //         baseUrl = data.download_url.split('/').slice(0, -1).join('/');
-                                        //     }
-                                        // } catch { /* empty */ }
-                                        // const converter = reloadMarkdownProcessor();
-                                        // const html = `
-                                        //     <div class="mes stem--readme"><div class="mes_text">${converter.makeHtml(md)}</div></div>
-                                        // `;
-                                        let readme = (await executeSlashCommandsWithOptions(`
-                                            /fetch ${ext.url} |
-                                            /$ query=".markdown-body.entry-content" take=innerHTML |
-                                        `)).pipe;
-                                        const html = `
-                                            <div class="mes stem--readme"><div class="mes_text">${readme}</div></div>
-                                        `;
+                                        let isOpen = true;
                                         const readmeDlg = new Popup(
-                                            html,
+                                            'Fetching readme...',
                                             POPUP_TYPE.TEXT,
                                             null,
                                             {
@@ -937,21 +1121,39 @@ const init = async()=>{
                                                 wider:true,
                                                 allowVerticalScrolling:true,
                                                 large:true,
+                                                onClose: ()=>{
+                                                    isOpen = false;
+                                                },
                                             },
                                         );
+                                        readmeDlg.show();
+                                        const response = await fetch('/api/plugins/emp/catalog/readme', {
+                                            method: 'POST',
+                                            headers: getRequestHeaders(),
+                                            body: JSON.stringify({
+                                                repo: ext.url,
+                                            }),
+                                        });
+                                        const { branch, readme:md } = await response.json();
+                                        if (!isOpen) return;
+                                        const converter = reloadMarkdownProcessor();
+                                        const readme = converter.makeHtml(md);
+                                        const html = `
+                                            <div class="mes stem--readme"><div class="mes_text">${readme}</div></div>
+                                        `;
+                                        readmeDlg.content.innerHTML = html;
                                         readmeDlg.dlg.addEventListener('mousedown', evt=>evt.stopPropagation());
                                         for (const a of Array.from(readmeDlg.dlg.querySelectorAll('a'))) {
                                             a.target = '_blank';
                                             if (a.href.startsWith('/')) a.href = `https://github.com${a.href}`;
                                             else if (!a.href.includes('://')) a.href = `${ext.url}/${a.href}`;
-                                            else if (a.href.startsWith(location.href)) a.href = `https://github.com${a.href.slice(location.href.length)}`;
+                                            else if (a.href.startsWith(location.href)) a.href = `${ext.url}/${a.href.slice(location.href.length)}`;
                                         }
                                         for (const el of Array.from(readmeDlg.dlg.querySelectorAll('[src]'))) {
                                             if (el.src.startsWith('/')) el.src = `https://github.com${el.src}`;
                                             // else if (!el.src.includes('://')) el.src = `${baseUrl}/${el.src}`;
-                                            else if (el.src.startsWith(location.href)) el.src = `https://github.com${el.src.slice(location.href.length)}`;
+                                            else if (el.src.startsWith(location.href)) el.src = `${ext.url}/raw/${branch}/${el.src.slice(location.href.length)}`;
                                         }
-                                        readmeDlg.show();
                                     });
                                     actions.append(readme);
                                 }

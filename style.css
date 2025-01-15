@@ -215,6 +215,24 @@
 .stem--body.stem--config textarea {
   flex: 1 1 auto;
 }
+.stem--filters {
+  display: flex;
+  gap: 1em;
+  align-items: baseline;
+  padding: 0.25em 0.5em;
+}
+.stem--filters .stem--search {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  flex: 1 1 auto;
+}
+.stem--filters .stem--filter {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  font-size: small;
+}
 .stem--table {
   border: 0;
   border-collapse: collapse;
@@ -250,6 +268,9 @@
 }
 .stem--table tr.stem--isDisabled .stem--toggle {
   color: #bd362f;
+}
+.stem--table tr[data-stem--filter]:not([data-stem--filter="[]"]) {
+  display: none;
 }
 .stem--table tr .stem--toggle {
   color: #51a351;

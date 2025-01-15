@@ -248,6 +248,29 @@
 }
 
 
+.stem--filters {
+    display: flex;
+    gap: 1em;
+    align-items: baseline;
+    padding: 0.25em 0.5em;
+
+    .stem--search {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5em;
+        flex: 1 1 auto;
+    }
+
+    .stem--filter {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5em;
+        font-size: small;
+    }
+}
+
+
+
 .stem--table {
 	border: 0;
 	border-collapse: collapse;
@@ -282,6 +305,9 @@
 				color: rgb(189 54 47);
 			}
 		}
+        &[data-stem--filter]:not([data-stem--filter="[]"]) {
+            display: none;
+        }
 		.stem--toggle {
 			color: rgb(81 163 81);
 		}
