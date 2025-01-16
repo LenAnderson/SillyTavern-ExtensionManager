@@ -744,12 +744,16 @@ const init = async()=>{
                         const url = document.createElement('td'); {
                             url.dataset.property = 'URL';
                             if (!manifest.isCore) {
-                                const a = document.createElement('a'); {
-                                    a.href = manifest.homePage;
-                                    a.target = '_blank';
-                                    a.textContent = manifest.homePage;
-                                    a.title = 'Open link in new tab';
-                                    url.append(a);
+                                const wrap = document.createElement('span'); {
+                                    wrap.classList.add('stem--urlWrap');
+                                    const a = document.createElement('a'); {
+                                        a.href = manifest.homePage;
+                                        a.target = '_blank';
+                                        a.textContent = manifest.homePage;
+                                        a.title = 'Open link in new tab';
+                                        wrap.append(a);
+                                    }
+                                    url.append(wrap);
                                 }
                             }
                             item.append(url);

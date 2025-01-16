@@ -252,6 +252,7 @@
     display: flex;
     gap: 1em;
     align-items: baseline;
+    background-color: var(--SmartThemeBorderColor);
     padding: 0.25em 0.5em;
 
     .stem--search {
@@ -279,7 +280,7 @@
 	white-space: nowrap;
 	width: 100%;
 	thead {
-		background-color: var(--SmartThemeBlurTintColor);
+        background-color: var(--SmartThemeBorderColor);
 		position: sticky;
 		top: 0;
 		z-index: 1;
@@ -342,10 +343,19 @@
 		text-align: center;
 	}
 	[data-property="URL"] {
+        position: relative;
 		width: 100%;
-		> a {
-			color: inherit;
-		}
+		.stem--urlWrap {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            a {
+                flex: 1 1 auto;
+                color: inherit;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
 	}
 
 	.stem--source {
@@ -406,5 +416,60 @@ body .popup .stem--readme {
     transform-origin: top center;
     body:has(.stem--mustReload) & {
         transform: scaleY(1);
+    }
+}
+
+
+
+
+
+@media screen and (max-width: 1000px) {
+    .stem--filters {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding-bottom: 1em;
+        background-color: var(--SmartThemeBorderColor);
+        .stem--search {
+            flex-basis: 100%;
+        }
+        .stem--filter {
+            font-size: 0.6em;
+        }
+    }
+    .stem--table {
+        display: flex;
+        flex-direction: column;
+        thead {
+            display: none;
+        }
+        tbody {
+            display: contents;
+        }
+        .stem--item {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        [data-property="Name"] {
+            flex-basis: calc(100% - 3em);
+        }
+
+        [data-property] {
+            width: auto;
+        }
+
+        [data-property="Source"] {
+            flex-basis: 3em;
+        }
+
+        [data-property="Actions"] {
+            flex-basis: 100%;
+        }
+
+        [data-property="URL"] {
+            flex: 1 1 auto;
+        }
+        .stem--actions {
+            justify-content: end;
+        }
     }
 }
