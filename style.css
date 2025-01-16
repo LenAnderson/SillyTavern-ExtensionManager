@@ -292,6 +292,14 @@
 .stem--table [data-property="Version"] {
   text-align: right;
 }
+.stem--table [data-property="Branch"]:not([data-count]) .stem--action,
+.stem--table [data-property="Branch"][data-count="0"] .stem--action,
+.stem--table [data-property="Branch"][data-count="1"] .stem--action {
+  display: none;
+}
+.stem--table [data-property="Branch"] .stem--branchLabel {
+  flex: 1 1 auto;
+}
 .stem--table [data-property="Source"] {
   text-align: center;
 }
@@ -313,15 +321,20 @@
 .stem--table .stem--actions {
   display: flex;
   gap: 0.5em;
+  align-items: baseline;
 }
 .stem--table .stem--actions .stem--action {
   transition: 200ms;
 }
-.stem--table .stem--actions .stem--action.stem--success {
-  background-color: #51a351;
+.stem--table .stem--actions .stem--action.stem--noUpdate {
+  color: #51a351;
+  opacity: 0.5;
 }
-.stem--table .stem--actions .stem--action.stem--failure {
-  background-color: #bd362f;
+.stem--table .stem--actions .stem--action.stem--hasUpdate {
+  color: #2f96b4;
+}
+.stem--table .stem--actions .stem--action.stem--error {
+  color: #f89406;
 }
 body .popup .stem--readme {
   border: none;

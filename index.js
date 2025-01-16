@@ -22,8 +22,8 @@ class Repository {
 /**@type {{
     repoList: Repository[],
     updateCheckHours: number,
-    extensionUpdateCheckList: {extension:string, checkedOn:number, hasUpdate:boolean}[],
-    pluginUpdateCheckList: {plugin:string, checkedOn:number, hasUpdate:boolean}[],
+    extensionUpdateCheckList: {extension:string, checkedOn:number, hasUpdate:boolean, details:{}}[],
+    pluginUpdateCheckList: {plugin:string, checkedOn:number, hasUpdate:boolean, details:{}}[],
 }} */
 const settings = Object.assign({
     /**@type {Repository[]} */
@@ -75,11 +75,13 @@ const appReady = new Promise(resolve=>eventSource.once(event_types.APP_READY, re
         homePage:string,
 
         name:string,
+        branch:{current:string, detached:boolean, all:string[], branches:{[name:string]:{}}},
         isCore:boolean,
         isDisabled:boolean,
         isDisabledNow:boolean,
         isUpToDate:boolean,
         isUpdated:boolean,
+        isRepo:boolean,
 
         tblRow:HTMLElement,
     }[]} */
@@ -117,10 +119,10 @@ const processQueue = async()=>{
         await delay(200);
         const { name, resolve } = updateQueue.shift();
         try {
-            const response = await fetch('/api/extensions/version', {
+            const response = await fetch('/api/plugins/emp/extensions/hasUpdates', {
                 method: 'POST',
                 headers: getRequestHeaders(),
-                body: JSON.stringify({ extensionName:name.slice('third-party'.length) }),
+                body: JSON.stringify({ extension:name.slice('third-party'.length) }),
             });
             if (!response.ok) {
                 resolve(null);
@@ -130,8 +132,15 @@ const processQueue = async()=>{
             let item = settings.extensionUpdateCheckList.find(it=>it.extension == name);
             if (item) {
                 item.checkedOn = Date.now();
+                item.hasUpdate = !data.isUpToDate;
+                item.details = data;
             } else {
-                item = { extension:name, checkedOn:Date.now(), hasUpdate:!data.isUpToDate };
+                item = {
+                    extension:name,
+                    checkedOn:Date.now(),
+                    hasUpdate:!data.isUpToDate,
+                    details: data,
+                };
                 settings.extensionUpdateCheckList.push(item);
             }
             saveSettings();
@@ -157,7 +166,7 @@ const processPluginQueue = async()=>{
         await delay(200);
         const { name, resolve } = pluginUpdateQueue.shift();
         try {
-            const response = await fetch('/api/plugins/pluginmanager/hasUpdates', {
+            const response = await fetch('/api/plugins/emp/plugins/hasUpdates', {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 body: JSON.stringify({ plugin:name }),
@@ -487,7 +496,7 @@ const init = async()=>{
                         cb.setAttribute('data-stem--filter', 'Updated');
                         cb.addEventListener('click', ()=>{
                             for (const manifest of manifests) {
-                                const show = manifest.isUpToDate;
+                                const show = manifest.isRepo && manifest.isUpToDate;
                                 const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
                                 const cur = filter.includes(cb.getAttribute('data-stem--filter'));
                                 if (!cb.checked && show) {
@@ -516,7 +525,7 @@ const init = async()=>{
                         cb.setAttribute('data-stem--filter', 'HasUpdate');
                         cb.addEventListener('click', ()=>{
                             for (const manifest of manifests) {
-                                const show = !manifest.isUpToDate;
+                                const show = manifest.isRepo && !manifest.isUpToDate;
                                 const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
                                 const cur = filter.includes(cb.getAttribute('data-stem--filter'));
                                 if (!cb.checked && show) {
@@ -536,6 +545,35 @@ const init = async()=>{
                         filterHasUpdate.append(lbl);
                     }
                     filterPanel.append(filterHasUpdate);
+                }
+                const filterError = document.createElement('label'); {
+                    filterError.classList.add('stem--filter');
+                    const cb = document.createElement('input'); {
+                        cb.type = 'checkbox';
+                        cb.checked = true;
+                        cb.setAttribute('data-stem--filter', 'Error');
+                        cb.addEventListener('click', ()=>{
+                            for (const manifest of manifests) {
+                                const show = !manifest.isRepo;
+                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                if (!cb.checked && show) {
+                                    if (!cur) {
+                                        filter.push(cb.getAttribute('data-stem--filter'));
+                                    }
+                                } else if (cur) {
+                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                }
+                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                            }
+                        });
+                        filterError.append(cb);
+                    }
+                    const lbl = document.createElement('div'); {
+                        lbl.textContent = 'Error';
+                        filterError.append(lbl);
+                    }
+                    filterPanel.append(filterError);
                 }
                 const filterCore = document.createElement('label'); {
                     filterCore.classList.add('stem--filter');
@@ -616,14 +654,14 @@ const init = async()=>{
                     return manifest;
                 }));
                 manifests.sort((a,b)=>{
-                    if (a.isCore && !b.isCore) return -1;
-                    if (!a.isCore && b.isCore) return 1;
+                    if (a.isCore && !b.isCore) return 1;
+                    if (!a.isCore && b.isCore) return -1;
                     return a.display_name.toLowerCase().localeCompare(b.display_name.toLowerCase());
                 });
                 tbl = document.createElement('table'); {
                     tbl.classList.add('stem--table');
                     const thead = document.createElement('thead'); {
-                        for (const col of ['Extension', 'Source', 'Version', 'Author', 'URL', 'Actions']) {
+                        for (const col of ['Extension', 'Source', 'Version', 'Branch', 'Author', 'URL', 'Actions']) {
                             const th = document.createElement('th'); {
                                 th.dataset.property = col;
                                 if (col == 'Qrs') {
@@ -632,22 +670,6 @@ const init = async()=>{
                                 if (!['Source', 'Actions'].includes(col)) {
                                     th.textContent = col;
                                 }
-                                // if (col == 'Actions') {
-                                //     const actions = document.createElement('div'); {
-                                //         actions.classList.add('stem--actions');
-                                //         const check = document.createElement('div'); {
-                                //             check.classList.add('stem--action');
-                                //             check.classList.add('menu_button');
-                                //             check.classList.add('fa-solid', 'fa-fw', 'fa-rotate');
-                                //             check.title = 'Check for updates';
-                                //             check.addEventListener('click', async()=>{
-                                //                 toastr.warning('oops');
-                                //             });
-                                //             actions.append(check);
-                                //         }
-                                //         th.append(actions);
-                                //     }
-                                // }
                                 thead.append(th);
                             }
                         }
@@ -659,6 +681,7 @@ const init = async()=>{
                     }
                 }
                 for (const manifest of manifests) {
+                    console.warn(manifest.display_name, manifest);
                     const item = document.createElement('tr'); {
                         item.classList.add('stem--item');
                         if (manifest.isCore) item.classList.add('stem--isCore');
@@ -689,6 +712,29 @@ const init = async()=>{
                             version.dataset.property = 'Version';
                             version.textContent = manifest.version;
                             item.append(version);
+                        }
+                        let branchLabel;
+                        const branch = document.createElement('td'); {
+                            branch.dataset.property = 'Branch';
+                            const wrap = document.createElement('div'); {
+                                wrap.classList.add('stem--actions');
+                                branchLabel = document.createElement('div'); {
+                                    branchLabel.classList.add('stem--branchLabel');
+                                    wrap.append(branchLabel);
+                                }
+                                const branchBtn = document.createElement('div'); {
+                                    branchBtn.classList.add('stem--action');
+                                    branchBtn.classList.add('menu_button');
+                                    branchBtn.classList.add('fa-solid', 'fa-fw', 'fa-code-branch');
+                                    branchBtn.title = 'Switch to another branch';
+                                    branchBtn.addEventListener('click', ()=>{
+                                        toastr.info('nope');
+                                    });
+                                    wrap.append(branchBtn);
+                                }
+                                branch.append(wrap);
+                            }
+                            item.append(branch);
                         }
                         const author = document.createElement('td'); {
                             author.dataset.property = 'Author';
@@ -739,48 +785,21 @@ const init = async()=>{
                                     wrap.append(toggle);
                                 }
                                 if (!manifest.isCore) {
+                                    let updateIcon;
                                     const update = document.createElement('div'); {
                                         update.classList.add('stem--action');
                                         update.classList.add('menu_button');
                                         update.classList.add('fa-fw');
-                                        const i = document.createElement('i'); {
-                                            i.classList.add('fa-solid', 'fa-fw', 'fa-spinner', 'fa-spin-pulse');
-                                            update.append(i);
+                                        updateIcon = document.createElement('i'); {
+                                            updateIcon.classList.add('fa-solid', 'fa-fw', 'fa-spinner', 'fa-spin-pulse');
+                                            update.append(updateIcon);
                                         }
                                         update.title = 'Checking for updates...';
-                                        const checkForUpdate = async(manifest, isUpToDate = null)=>{
-                                            let data;
-                                            if (isUpToDate === null) {
-                                                data = await queueCheckForUpdate(manifest.name);
-                                            } else {
-                                                data = { isUpToDate };
-                                            }
-                                            i.classList.remove('fa-spinner', 'fa-spin-pulse');
-                                            if (!data) {
-                                                update.title = 'Failed to fetch extension status!';
-                                                i.classList.add('fa-triangle-exclamation');
-                                                return;
-                                            }
-                                            manifest.isUpToDate = data.isUpToDate;
-                                            if (data.isUpToDate) {
-                                                i.classList.add('fa-code-commit');
-                                                update.title = 'No update\n---\nclick to check for updates';
-                                            } else {
-                                                i.classList.add('fa-download');
-                                                update.title = 'Download update';
-                                            }
-                                        };
                                         update.addEventListener('click', async()=>{
-                                            if (manifest.isUpToDate !== false) {
-                                                i.classList.remove('fa-code-commit');
-                                                i.classList.add('fa-spinner', 'fa-spin-pulse');
-                                                update.title = 'Checking for updates...';
-                                                await checkForUpdate(manifest);
-                                                return;
-                                            }
+                                            if (manifest.isUpToDate === true) return;
                                             item.classList.add('stem--isBusy');
-                                            i.classList.remove('fa-download');
-                                            i.classList.add('fa-spinner', 'fa-spin-pulse');
+                                            updateIcon.classList.remove('fa-download');
+                                            updateIcon.classList.add('fa-spinner', 'fa-spin-pulse');
                                             update.title = 'Updating...';
                                             const response = await fetch('/api/extensions/update', {
                                                 method: 'POST',
@@ -789,8 +808,8 @@ const init = async()=>{
                                             });
                                             if (!response.ok) {
                                                 item.classList.remove('stem--isBusy');
-                                                i.classList.remove('fa-spinner', 'fa-spin-pulse');
-                                                i.classList.add('fa-download');
+                                                updateIcon.classList.remove('fa-spinner', 'fa-spin-pulse');
+                                                updateIcon.classList.add('fa-download');
                                                 toastr.warning(`Failed to update extension: ${manifest.display_name}`);
                                                 return;
                                             }
@@ -798,22 +817,92 @@ const init = async()=>{
                                             manifest.isUpdated = true;
                                             item.classList.remove('stem--isBusy');
                                             item.classList.add('stem--mustReload');
+                                            updateIcon.classList.remove('fa-spinner', 'fa-spin-pulse');
+                                            updateIcon.classList.add('fa-check');
+                                        });
+                                        wrap.append(update);
+                                    }
+                                    const checkUpdate = document.createElement('div'); {
+                                        checkUpdate.classList.add('stem--action');
+                                        checkUpdate.classList.add('menu_button');
+                                        checkUpdate.classList.add('fa-fw');
+                                        checkUpdate.title = 'Check for updates';
+                                        const i = document.createElement('i'); {
+                                            i.classList.add('fa-solid', 'fa-fw', 'fa-rotate');
+                                            checkUpdate.append(i);
+                                        }
+                                        const checkForUpdate = async(manifest, cache = null)=>{
+                                            update.classList.remove('stem--noUpdate');
+                                            update.classList.remove('stem--hasUpdate');
+                                            update.classList.remove('stem--error');
+                                            updateIcon.classList.remove('fa-bounce');
+                                            updateIcon.classList.remove('fa-triangle-exclamation');
+                                            let data;
+                                            if (!cache?.details) {
+                                                data = await queueCheckForUpdate(manifest.name);
+                                            } else {
+                                                data = cache.details;
+                                            }
+                                            updateIcon.classList.remove('fa-spinner', 'fa-spin-pulse');
                                             i.classList.remove('fa-spinner', 'fa-spin-pulse');
-                                            i.classList.add('fa-code-commit');
+                                            if (!data?.isRepo) {
+                                                update.classList.add('stem--error');
+                                                updateIcon.classList.add('fa-triangle-exclamation');
+                                                update.title = 'Failed to fetch extension status!';
+                                                manifest.isRepo = false;
+                                                branchLabel.textContent = '';
+                                                branch.title = '';
+                                                return;
+                                            }
+                                            manifest.isRepo = true;
+                                            manifest.isUpToDate = data.isUpToDate;
+                                            manifest.branch = data.branch;
+                                            branchLabel.textContent = data.branch?.current ?? '';
+                                            const branchList = manifest.branch?.all
+                                                ?.filter(it=>it.startsWith('remotes/'))
+                                                ?.map(it=>`• ${it.replace(/^remotes\/(?:origin\/)?/, '')}`)
+                                                ?? []
+                                            ;
+                                            branch.title = [
+                                                'Branches:',
+                                                ...branchList,
+                                            ].join('\n');
+                                            branch.dataset.count = branchList.length;
+                                            if (data.isUpToDate) {
+                                                update.classList.add('stem--noUpdate');
+                                                updateIcon.classList.add('fa-check');
+                                                update.title = 'No update';
+                                            } else {
+                                                update.classList.add('stem--hasUpdate');
+                                                updateIcon.classList.add('fa-bounce');
+                                                updateIcon.classList.add('fa-download');
+                                                update.title = [
+                                                    'Download update',
+                                                    `v${data.manifest?.version ?? '??'}`,
+                                                    '---',
+                                                    (data.log?.all ?? []).map(it=>`• ${it.message}`).join('\n'),
+                                                ].join('\n');
+                                            }
+                                        };
+                                        checkUpdate.addEventListener('click', async()=>{
+                                            updateIcon.classList.remove('fa-check');
+                                            updateIcon.classList.add('fa-spinner', 'fa-spin-pulse');
+                                            update.title = 'Checking for updates...';
+                                            await checkForUpdate(manifest);
                                         });
                                         appReady.then(()=>{
-                                            const item = settings.extensionUpdateCheckList.find(it=>it.extension == manifest.name);
-                                            const lastCheck = item?.checkedOn ?? 0;
+                                            const cache = settings.extensionUpdateCheckList.find(it=>it.extension == manifest.name);
+                                            const lastCheck = cache?.checkedOn ?? 0;
                                             const targetTime = lastCheck + (1000 * 60 * 60 * settings.updateCheckHours);
                                             if (targetTime < Date.now()) {
                                                 ((manifest)=>checkForUpdate(manifest))(manifest);
                                             } else {
-                                                ((manifest, item)=>checkForUpdate(manifest, !item.hasUpdate))(manifest, item);
+                                                ((manifest, cache)=>checkForUpdate(manifest, cache))(manifest, cache);
 
                                             }
                                             return null;
                                         });
-                                        wrap.append(update);
+                                        wrap.append(checkUpdate);
                                     }
                                     const del = document.createElement('div'); {
                                         del.classList.add('stem--action');
@@ -951,7 +1040,7 @@ const init = async()=>{
                                         }
                                         plugin.isUpToDate = data.isUpToDate;
                                         if (data.isUpToDate) {
-                                            i.classList.add('fa-code-commit');
+                                            i.classList.add('fa-check');
                                             update.title = 'No update\n---\nclick to check for updates';
                                         } else {
                                             i.classList.add('fa-download');
@@ -960,7 +1049,7 @@ const init = async()=>{
                                     };
                                     update.addEventListener('click', async()=>{
                                         if (plugin.isUpToDate !== false) {
-                                            i.classList.remove('fa-code-commit');
+                                            i.classList.remove('fa-check');
                                             i.classList.add('fa-spinner', 'fa-spin-pulse');
                                             update.title = 'Checking for updates...';
                                             await checkForUpdate(plugin);
@@ -987,7 +1076,7 @@ const init = async()=>{
                                         item.classList.remove('stem--isBusy');
                                         item.classList.add('stem--mustReload');
                                         i.classList.remove('fa-spinner', 'fa-spin-pulse');
-                                        i.classList.add('fa-code-commit');
+                                        i.classList.add('fa-check');
                                     });
                                     appReady.then(()=>{
                                         const item = settings.pluginUpdateCheckList.find(it=>it.plugin == plugin.name);
