@@ -819,6 +819,11 @@ const init = async()=>{
                                             }
                                             manifest.isUpToDate = true;
                                             manifest.isUpdated = true;
+                                            const cache = settings.extensionUpdateCheckList.find(it=>it.extension == manifest.name);
+                                            if (cache) {
+                                                cache.checkedOn = Date.now();
+                                                cache.hasUpdate = false;
+                                            }
                                             item.classList.remove('stem--isBusy');
                                             item.classList.add('stem--mustReload');
                                             updateIcon.classList.remove('fa-spinner', 'fa-spin-pulse');
