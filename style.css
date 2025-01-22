@@ -228,6 +228,21 @@
   gap: 0.5em;
   flex: 1 1 auto;
 }
+.stem--filters .stem--group {
+  display: flex;
+  gap: 1em;
+  align-items: baseline;
+  position: relative;
+  padding-top: 0.7em;
+}
+.stem--filters .stem--groupLabel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 0.7em;
+  line-height: 1;
+  opacity: 0.5;
+}
 .stem--filters .stem--filter {
   display: flex;
   align-items: baseline;
@@ -270,6 +285,10 @@
 .stem--table tr.stem--isDisabled .stem--toggle {
   color: #bd362f;
 }
+.stem--table tr[data-stem--hasErrors] .stem--actions .stem--action.stem--errorLog {
+  opacity: 1;
+  pointer-events: all;
+}
 .stem--table tr[data-stem--filter]:not([data-stem--filter="[]"]) {
   display: none;
 }
@@ -309,9 +328,10 @@
   width: 100%;
 }
 .stem--table [data-property="URL"] .stem--urlWrap {
+  display: flex;
+  align-items: center;
   position: absolute;
   inset: 0;
-  display: flex;
 }
 .stem--table [data-property="URL"] .stem--urlWrap a {
   flex: 1 1 auto;
@@ -331,7 +351,7 @@
 .stem--table .stem--actions {
   display: flex;
   gap: 0.5em;
-  align-items: baseline;
+  align-items: center;
 }
 .stem--table .stem--actions .stem--action {
   transition: 200ms;
@@ -345,6 +365,15 @@
 }
 .stem--table .stem--actions .stem--action.stem--error {
   color: #f89406;
+}
+.stem--table .stem--actions .stem--action.stem--errorLog {
+  color: #bd362f;
+  opacity: 0;
+  pointer-events: none;
+  transition: 200ms;
+}
+.stem--table .stem--actions .stem--action.stem--errorLog .fa-exclamation {
+  color: white;
 }
 body .popup .stem--readme {
   border: none;
@@ -369,7 +398,7 @@ body .popup .stem--readme {
 body:has(.stem--mustReload) .stem--reloadWarning {
   transform: scaleY(1);
 }
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1400px) {
   .stem--filters {
     flex-wrap: wrap;
     justify-content: space-between;
@@ -382,6 +411,8 @@ body:has(.stem--mustReload) .stem--reloadWarning {
   .stem--filters .stem--filter {
     font-size: 0.6em;
   }
+}
+@media screen and (max-width: 1000px) {
   .stem--table {
     display: flex;
     flex-direction: column;
@@ -414,4 +445,45 @@ body:has(.stem--mustReload) .stem--reloadWarning {
   .stem--table .stem--actions {
     justify-content: end;
   }
+}
+.stem--errorLogPopup {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+.stem--errorLogPopup .stem--title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+}
+.stem--errorLogPopup .stem--title .stem--success {
+  background-color: #51a351;
+}
+.stem--errorLogPopup .stem--title .stem--failure {
+  background-color: #bd362f;
+}
+.stem--errorLogPopup .stem--errorContent {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  text-align: left;
+  overflow: auto;
+}
+.stem--errorLogPopup .stem--errorContent .stem--error {
+  background-color: rgba(189, 54, 47, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  font-family: var(--monoFontFamily);
+  font-size: smaller;
+}
+.stem--errorLogPopup .stem--errorContent .stem--error .stem--head {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 0.25em;
+}
+.stem--errorLogPopup .stem--errorContent .stem--error .stem--stack {
+  padding: 0.5em;
+  white-space: pre-wrap;
 }

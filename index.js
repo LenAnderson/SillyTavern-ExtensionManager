@@ -86,6 +86,10 @@ const appReady = new Promise(resolve=>eventSource.once(event_types.APP_READY, re
         tblRow:HTMLElement,
     }[]} */
 let manifests = [];
+/**@type {{
+ *      [extension:string]: { time:number, stack:string }[]
+ * }} */
+let errors = {};
 
 const dom = {
     config: {
@@ -218,6 +222,23 @@ const init = async()=>{
         warning.textContent = 'Reload the page to apply extension changes';
         document.body.append(warning);
     }
+
+    // collect extension errors
+    /**
+     * @param {ErrorEvent|PromiseRejectionEvent} evt
+     */
+    const handleError = (evt)=>{
+        const ex = evt instanceof ErrorEvent ? evt.error : evt.reason;
+        const stack = ex.stack.split('\n').map(it=>it.trim());
+        const isThirdParty = stack.find(it=>it.includes('/scripts/extensions/third-party/')) != null;
+        if (!isThirdParty) return;
+        const source = stack.find(it=>it.includes('/scripts/extensions/third-party/')).replace(/^.*?\/scripts\/extensions\/(third-party\/[^/]+)\/.*$/, '$1');
+        if (!errors[source]) errors[source] = [];
+        errors[source].push({ time:Date.now(), stack:ex.stack });
+        manifests.find(it=>it.name == source)?.tblRow?.setAttribute('data-stem--hasErrors', '1');
+    };
+    window.addEventListener('error', (evt)=>handleError(evt));
+    window.addEventListener('unhandledrejection', (evt)=>handleError(evt));
 
     const goToTab = async(key)=>{
         for (const [k, v] of Object.entries(tabBody)) {
@@ -430,208 +451,302 @@ const init = async()=>{
                     }
                     filterPanel.append(search);
                 }
-                const filterEnabled = document.createElement('label'); {
-                    filterEnabled.classList.add('stem--filter');
-                    const cb = document.createElement('input'); {
-                        cb.type = 'checkbox';
-                        cb.checked = true;
-                        cb.setAttribute('data-stem--filter', 'Enabled');
-                        cb.addEventListener('click', ()=>{
-                            for (const manifest of manifests) {
-                                const show = !manifest.isDisabledNow;
-                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
-                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
-                                if (!cb.checked && show) {
-                                    if (!cur) {
-                                        filter.push(cb.getAttribute('data-stem--filter'));
-                                    }
-                                } else if (cur) {
-                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
-                                }
-                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
-                            }
-                        });
-                        filterEnabled.append(cb);
-                    }
+                const groupStatus = document.createElement('div'); {
+                    groupStatus.classList.add('stem--group');
                     const lbl = document.createElement('div'); {
-                        lbl.textContent = 'Enabled';
-                        filterEnabled.append(lbl);
+                        lbl.classList.add('stem--groupLabel');
+                        lbl.textContent = 'Status';
+                        groupStatus.append(lbl);
                     }
-                    filterPanel.append(filterEnabled);
+                    const filterEnabled = document.createElement('label'); {
+                        filterEnabled.classList.add('stem--filter');
+                        const cb = document.createElement('input'); {
+                            cb.type = 'checkbox';
+                            cb.checked = true;
+                            cb.setAttribute('data-stem--filter', 'Enabled');
+                            cb.addEventListener('click', ()=>{
+                                for (const manifest of manifests) {
+                                    const show = !manifest.isDisabledNow;
+                                    const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                    const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                    if (!cb.checked && show) {
+                                        if (!cur) {
+                                            filter.push(cb.getAttribute('data-stem--filter'));
+                                        }
+                                    } else if (cur) {
+                                        filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                    }
+                                    manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                                }
+                            });
+                            filterEnabled.append(cb);
+                        }
+                        const lbl = document.createElement('div'); {
+                            lbl.textContent = 'Enabled';
+                            filterEnabled.append(lbl);
+                        }
+                        groupStatus.append(filterEnabled);
+                    }
+                    const filterDisabled = document.createElement('label'); {
+                        filterDisabled.classList.add('stem--filter');
+                        const cb = document.createElement('input'); {
+                            cb.type = 'checkbox';
+                            cb.checked = true;
+                            cb.setAttribute('data-stem--filter', 'Disabled');
+                            cb.addEventListener('click', ()=>{
+                                for (const manifest of manifests) {
+                                    const show = manifest.isDisabledNow;
+                                    const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                    const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                    if (!cb.checked && show) {
+                                        if (!cur) {
+                                            filter.push(cb.getAttribute('data-stem--filter'));
+                                        }
+                                    } else if (cur) {
+                                        filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                    }
+                                    manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                                }
+                            });
+                            filterDisabled.append(cb);
+                        }
+                        const lbl = document.createElement('div'); {
+                            lbl.textContent = 'Disabled';
+                            filterDisabled.append(lbl);
+                        }
+                        groupStatus.append(filterDisabled);
+                    }
+                    filterPanel.append(groupStatus);
                 }
-                const filterDisabled = document.createElement('label'); {
-                    filterDisabled.classList.add('stem--filter');
-                    const cb = document.createElement('input'); {
-                        cb.type = 'checkbox';
-                        cb.checked = true;
-                        cb.setAttribute('data-stem--filter', 'Disabled');
-                        cb.addEventListener('click', ()=>{
-                            for (const manifest of manifests) {
-                                const show = manifest.isDisabledNow;
-                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
-                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
-                                if (!cb.checked && show) {
-                                    if (!cur) {
-                                        filter.push(cb.getAttribute('data-stem--filter'));
-                                    }
-                                } else if (cur) {
-                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
-                                }
-                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
-                            }
-                        });
-                        filterDisabled.append(cb);
-                    }
+                const groupUpdates = document.createElement('div'); {
+                    groupUpdates.classList.add('stem--group');
                     const lbl = document.createElement('div'); {
-                        lbl.textContent = 'Disabled';
-                        filterDisabled.append(lbl);
+                        lbl.classList.add('stem--groupLabel');
+                        lbl.textContent = 'Updates';
+                        groupUpdates.append(lbl);
                     }
-                    filterPanel.append(filterDisabled);
+                    const filterUpdated = document.createElement('label'); {
+                        filterUpdated.classList.add('stem--filter');
+                        const cb = document.createElement('input'); {
+                            cb.type = 'checkbox';
+                            cb.checked = true;
+                            cb.setAttribute('data-stem--filter', 'Updated');
+                            cb.addEventListener('click', ()=>{
+                                for (const manifest of manifests) {
+                                    const show = manifest.isRepo && manifest.isUpToDate;
+                                    const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                    const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                    if (!cb.checked && show) {
+                                        if (!cur) {
+                                            filter.push(cb.getAttribute('data-stem--filter'));
+                                        }
+                                    } else if (cur) {
+                                        filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                    }
+                                    manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                                }
+                            });
+                            filterUpdated.append(cb);
+                        }
+                        const lbl = document.createElement('div'); {
+                            lbl.textContent = 'Updated';
+                            filterUpdated.append(lbl);
+                        }
+                        groupUpdates.append(filterUpdated);
+                    }
+                    const filterHasUpdate = document.createElement('label'); {
+                        filterHasUpdate.classList.add('stem--filter');
+                        const cb = document.createElement('input'); {
+                            cb.type = 'checkbox';
+                            cb.checked = true;
+                            cb.setAttribute('data-stem--filter', 'HasUpdate');
+                            cb.addEventListener('click', ()=>{
+                                for (const manifest of manifests) {
+                                    const show = manifest.isRepo && !manifest.isUpToDate;
+                                    const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                    const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                    if (!cb.checked && show) {
+                                        if (!cur) {
+                                            filter.push(cb.getAttribute('data-stem--filter'));
+                                        }
+                                    } else if (cur) {
+                                        filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                    }
+                                    manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                                }
+                            });
+                            filterHasUpdate.append(cb);
+                        }
+                        const lbl = document.createElement('div'); {
+                            lbl.textContent = 'Has update';
+                            filterHasUpdate.append(lbl);
+                        }
+                        groupUpdates.append(filterHasUpdate);
+                    }
+                    const filterCantUpdate = document.createElement('label'); {
+                        filterCantUpdate.classList.add('stem--filter');
+                        const cb = document.createElement('input'); {
+                            cb.type = 'checkbox';
+                            cb.checked = true;
+                            cb.setAttribute('data-stem--filter', 'CantUpdate');
+                            cb.addEventListener('click', ()=>{
+                                for (const manifest of manifests) {
+                                    const show = !manifest.isRepo;
+                                    const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                    const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                    if (!cb.checked && show) {
+                                        if (!cur) {
+                                            filter.push(cb.getAttribute('data-stem--filter'));
+                                        }
+                                    } else if (cur) {
+                                        filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                    }
+                                    manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                                }
+                            });
+                            filterCantUpdate.append(cb);
+                        }
+                        const lbl = document.createElement('div'); {
+                            lbl.textContent = 'Can\'t Update';
+                            filterCantUpdate.append(lbl);
+                        }
+                        groupUpdates.append(filterCantUpdate);
+                    }
+                    filterPanel.append(groupUpdates);
                 }
-                const filterUpdated = document.createElement('label'); {
-                    filterUpdated.classList.add('stem--filter');
-                    const cb = document.createElement('input'); {
-                        cb.type = 'checkbox';
-                        cb.checked = true;
-                        cb.setAttribute('data-stem--filter', 'Updated');
-                        cb.addEventListener('click', ()=>{
-                            for (const manifest of manifests) {
-                                const show = manifest.isRepo && manifest.isUpToDate;
-                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
-                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
-                                if (!cb.checked && show) {
-                                    if (!cur) {
-                                        filter.push(cb.getAttribute('data-stem--filter'));
-                                    }
-                                } else if (cur) {
-                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
-                                }
-                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
-                            }
-                        });
-                        filterUpdated.append(cb);
-                    }
+                const groupErrors = document.createElement('div'); {
+                    groupErrors.classList.add('stem--group');
                     const lbl = document.createElement('div'); {
-                        lbl.textContent = 'Updated';
-                        filterUpdated.append(lbl);
+                        lbl.classList.add('stem--groupLabel');
+                        lbl.textContent = 'Errors';
+                        groupErrors.append(lbl);
                     }
-                    filterPanel.append(filterUpdated);
+                    const filterErrorLog = document.createElement('label'); {
+                        filterErrorLog.classList.add('stem--filter');
+                        const cb = document.createElement('input'); {
+                            cb.type = 'checkbox';
+                            cb.checked = true;
+                            cb.setAttribute('data-stem--filter', 'ErrorLog');
+                            cb.addEventListener('click', ()=>{
+                                for (const manifest of manifests) {
+                                    const show = !!errors[manifest.name]?.length;
+                                    const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                    const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                    if (!cb.checked && show) {
+                                        if (!cur) {
+                                            filter.push(cb.getAttribute('data-stem--filter'));
+                                        }
+                                    } else if (cur) {
+                                        filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                    }
+                                    manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                                }
+                            });
+                            filterErrorLog.append(cb);
+                        }
+                        const lbl = document.createElement('div'); {
+                            lbl.textContent = 'Errors';
+                            filterErrorLog.append(lbl);
+                        }
+                        groupErrors.append(filterErrorLog);
+                    }
+                    const filterNoErrorLog = document.createElement('label'); {
+                        filterNoErrorLog.classList.add('stem--filter');
+                        const cb = document.createElement('input'); {
+                            cb.type = 'checkbox';
+                            cb.checked = true;
+                            cb.setAttribute('data-stem--filter', 'NoErrorLog');
+                            cb.addEventListener('click', ()=>{
+                                for (const manifest of manifests) {
+                                    const show = !errors[manifest.name]?.length;
+                                    const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                    const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                    if (!cb.checked && show) {
+                                        if (!cur) {
+                                            filter.push(cb.getAttribute('data-stem--filter'));
+                                        }
+                                    } else if (cur) {
+                                        filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                    }
+                                    manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
+                                }
+                            });
+                            filterNoErrorLog.append(cb);
+                        }
+                        const lbl = document.createElement('div'); {
+                            lbl.textContent = 'No Errors';
+                            filterNoErrorLog.append(lbl);
+                        }
+                        groupErrors.append(filterNoErrorLog);
+                    }
+                    filterPanel.append(groupErrors);
                 }
-                const filterHasUpdate = document.createElement('label'); {
-                    filterHasUpdate.classList.add('stem--filter');
-                    const cb = document.createElement('input'); {
-                        cb.type = 'checkbox';
-                        cb.checked = true;
-                        cb.setAttribute('data-stem--filter', 'HasUpdate');
-                        cb.addEventListener('click', ()=>{
-                            for (const manifest of manifests) {
-                                const show = manifest.isRepo && !manifest.isUpToDate;
-                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
-                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
-                                if (!cb.checked && show) {
-                                    if (!cur) {
-                                        filter.push(cb.getAttribute('data-stem--filter'));
-                                    }
-                                } else if (cur) {
-                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
-                                }
-                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
-                            }
-                        });
-                        filterHasUpdate.append(cb);
-                    }
+                const groupSource = document.createElement('div'); {
+                    groupSource.classList.add('stem--group');
                     const lbl = document.createElement('div'); {
-                        lbl.textContent = 'Has update';
-                        filterHasUpdate.append(lbl);
+                        lbl.classList.add('stem--groupLabel');
+                        lbl.textContent = 'Source';
+                        groupSource.append(lbl);
                     }
-                    filterPanel.append(filterHasUpdate);
-                }
-                const filterError = document.createElement('label'); {
-                    filterError.classList.add('stem--filter');
-                    const cb = document.createElement('input'); {
-                        cb.type = 'checkbox';
-                        cb.checked = true;
-                        cb.setAttribute('data-stem--filter', 'Error');
-                        cb.addEventListener('click', ()=>{
-                            for (const manifest of manifests) {
-                                const show = !manifest.isRepo;
-                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
-                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
-                                if (!cb.checked && show) {
-                                    if (!cur) {
-                                        filter.push(cb.getAttribute('data-stem--filter'));
+                    const filterCore = document.createElement('label'); {
+                        filterCore.classList.add('stem--filter');
+                        const cb = document.createElement('input'); {
+                            cb.type = 'checkbox';
+                            cb.checked = true;
+                            cb.setAttribute('data-stem--filter', 'Core');
+                            cb.addEventListener('click', ()=>{
+                                for (const manifest of manifests) {
+                                    const show = manifest.isCore;
+                                    const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                    const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                    if (!cb.checked && show) {
+                                        if (!cur) {
+                                            filter.push(cb.getAttribute('data-stem--filter'));
+                                        }
+                                    } else if (cur) {
+                                        filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
                                     }
-                                } else if (cur) {
-                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                    manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
                                 }
-                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
-                            }
-                        });
-                        filterError.append(cb);
+                            });
+                            filterCore.append(cb);
+                        }
+                        const lbl = document.createElement('div'); {
+                            lbl.textContent = 'Core';
+                            filterCore.append(lbl);
+                        }
+                        groupSource.append(filterCore);
                     }
-                    const lbl = document.createElement('div'); {
-                        lbl.textContent = 'Error';
-                        filterError.append(lbl);
-                    }
-                    filterPanel.append(filterError);
-                }
-                const filterCore = document.createElement('label'); {
-                    filterCore.classList.add('stem--filter');
-                    const cb = document.createElement('input'); {
-                        cb.type = 'checkbox';
-                        cb.checked = true;
-                        cb.setAttribute('data-stem--filter', 'Core');
-                        cb.addEventListener('click', ()=>{
-                            for (const manifest of manifests) {
-                                const show = manifest.isCore;
-                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
-                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
-                                if (!cb.checked && show) {
-                                    if (!cur) {
-                                        filter.push(cb.getAttribute('data-stem--filter'));
+                    const filterThirdParty = document.createElement('label'); {
+                        filterThirdParty.classList.add('stem--filter');
+                        const cb = document.createElement('input'); {
+                            cb.type = 'checkbox';
+                            cb.checked = true;
+                            cb.setAttribute('data-stem--filter', 'ThirdParty');
+                            cb.addEventListener('click', ()=>{
+                                for (const manifest of manifests) {
+                                    const show = !manifest.isCore;
+                                    const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
+                                    const cur = filter.includes(cb.getAttribute('data-stem--filter'));
+                                    if (!cb.checked && show) {
+                                        if (!cur) {
+                                            filter.push(cb.getAttribute('data-stem--filter'));
+                                        }
+                                    } else if (cur) {
+                                        filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
                                     }
-                                } else if (cur) {
-                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
+                                    manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
                                 }
-                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
-                            }
-                        });
-                        filterCore.append(cb);
+                            });
+                            filterThirdParty.append(cb);
+                        }
+                        const lbl = document.createElement('div'); {
+                            lbl.textContent = 'Third-party';
+                            filterThirdParty.append(lbl);
+                        }
+                        groupSource.append(filterThirdParty);
                     }
-                    const lbl = document.createElement('div'); {
-                        lbl.textContent = 'Core';
-                        filterCore.append(lbl);
-                    }
-                    filterPanel.append(filterCore);
-                }
-                const filterThirdParty = document.createElement('label'); {
-                    filterThirdParty.classList.add('stem--filter');
-                    const cb = document.createElement('input'); {
-                        cb.type = 'checkbox';
-                        cb.checked = true;
-                        cb.setAttribute('data-stem--filter', 'ThirdParty');
-                        cb.addEventListener('click', ()=>{
-                            for (const manifest of manifests) {
-                                const show = !manifest.isCore;
-                                const filter = JSON.parse(manifest.tblRow.getAttribute('data-stem--filter') ?? '[]');
-                                const cur = filter.includes(cb.getAttribute('data-stem--filter'));
-                                if (!cb.checked && show) {
-                                    if (!cur) {
-                                        filter.push(cb.getAttribute('data-stem--filter'));
-                                    }
-                                } else if (cur) {
-                                    filter.splice(filter.indexOf(cb.getAttribute('data-stem--filter')), 1);
-                                }
-                                manifest.tblRow.setAttribute('data-stem--filter', JSON.stringify(filter));
-                            }
-                        });
-                        filterThirdParty.append(cb);
-                    }
-                    const lbl = document.createElement('div'); {
-                        lbl.textContent = 'Third-party';
-                        filterThirdParty.append(lbl);
-                    }
-                    filterPanel.append(filterThirdParty);
+                    filterPanel.append(groupSource);
                 }
                 body.append(filterPanel);
             }
@@ -912,6 +1027,98 @@ const init = async()=>{
                                             return null;
                                         });
                                         wrap.append(checkUpdate);
+                                    }
+                                    const errorLog = document.createElement('div'); {
+                                        errorLog.classList.add('stem--action');
+                                        errorLog.classList.add('stem--errorLog');
+                                        errorLog.classList.add('menu_button');
+                                        errorLog.classList.add('fa-stack', 'fa-fw');
+                                        errorLog.title = 'Errors';
+                                        errorLog.addEventListener('click', async()=>{
+                                            const dom = document.createElement('div'); {
+                                                dom.classList.add('stem--errorLogPopup');
+                                                const head = document.createElement('h3'); {
+                                                    head.classList.add('stem--title');
+                                                    const text = document.createElement('div'); {
+                                                        text.textContent = manifest.display_name;
+                                                        head.append(text);
+                                                    }
+                                                    const copy = document.createElement('div'); {
+                                                        copy.classList.add('menu_button');
+                                                        copy.classList.add('fa-solid', 'fa-fw', 'fa-copy');
+                                                        copy.title = 'Copy error log to clipboard';
+                                                        copy.addEventListener('click', async()=>{
+                                                            const value = errors[manifest.name]
+                                                                .map(ex=>`${new Date(ex.time).toISOString()}\n${ex.stack}`)
+                                                                .join('\n\n')
+                                                            ;
+                                                            let ok = false;
+                                                            try {
+                                                                navigator.clipboard.writeText(value.toString());
+                                                                ok = true;
+                                                            } catch {
+                                                                console.warn('/copy cannot use clipboard API, falling back to execCommand');
+                                                                const ta = document.createElement('textarea'); {
+                                                                    ta.value = value.toString();
+                                                                    ta.style.position = 'fixed';
+                                                                    ta.style.inset = '0';
+                                                                    document.body.append(ta);
+                                                                    ta.focus();
+                                                                    ta.select();
+                                                                    try {
+                                                                        document.execCommand('copy');
+                                                                        ok = true;
+                                                                    } catch (err) {
+                                                                        console.error('Unable to copy to clipboard', err);
+                                                                    }
+                                                                    ta.remove();
+                                                                }
+                                                            }
+                                                            copy.classList.add(`stem--${ok ? 'success' : 'failure'}`);
+                                                            await delay(1000);
+                                                            copy.classList.remove(`stem--${ok ? 'success' : 'failure'}`);
+                                                        });
+                                                        head.append(copy);
+                                                    }
+                                                    dom.append(head);
+                                                }
+                                                const content = document.createElement('div'); {
+                                                    content.classList.add('stem--errorContent');
+                                                    for (const ex of errors[manifest.name] ?? []) {
+                                                        const err = document.createElement('div'); {
+                                                            err.classList.add('stem--error');
+                                                            const h = document.createElement('div'); {
+                                                                h.classList.add('stem--head');
+                                                                h.textContent = new Date(ex.time).toISOString();
+                                                                err.append(h);
+                                                            }
+                                                            const stack = document.createElement('div'); {
+                                                                stack.classList.add('stem--stack');
+                                                                stack.textContent = ex.stack;
+                                                                err.append(stack);
+                                                            }
+                                                            content.append(err);
+                                                        }
+                                                    }
+                                                    dom.append(content);
+                                                }
+                                            }
+                                            const dlg = new Popup(dom, POPUP_TYPE.TEXT, null, {
+                                                wide: true,
+                                                wider: true,
+                                                large: true,
+                                            });
+                                            dlg.show();
+                                        });
+                                        const iconFile = document.createElement('i'); {
+                                            iconFile.classList.add('fa-solid', 'fa-stack-1x', 'fa-file');
+                                            errorLog.append(iconFile);
+                                        }
+                                        const iconExclamation = document.createElement('i'); {
+                                            iconExclamation.classList.add('fa-solid', 'fa-stack-1x', 'fa-exclamation');
+                                            errorLog.append(iconExclamation);
+                                        }
+                                        wrap.append(errorLog);
                                     }
                                     const del = document.createElement('div'); {
                                         del.classList.add('stem--action');

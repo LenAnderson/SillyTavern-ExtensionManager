@@ -262,6 +262,22 @@
         flex: 1 1 auto;
     }
 
+    .stem--group {
+        display: flex;
+        gap: 1em;
+        align-items: baseline;
+        position: relative;
+        padding-top: 0.7em;
+    }
+    .stem--groupLabel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        font-size: 0.7em;
+        line-height: 1;
+        opacity: 0.5;
+    }
+
     .stem--filter {
         display: flex;
         align-items: baseline;
@@ -306,6 +322,12 @@
 				color: rgb(189 54 47);
 			}
 		}
+        &[data-stem--hasErrors] {
+            .stem--actions .stem--action.stem--errorLog {
+                opacity: 1;
+                pointer-events: all;
+            }
+        }
         &[data-stem--filter]:not([data-stem--filter="[]"]) {
             display: none;
         }
@@ -346,9 +368,10 @@
         position: relative;
 		width: 100%;
 		.stem--urlWrap {
+            display: flex;
+			align-items: center;
             position: absolute;
             inset: 0;
-            display: flex;
             a {
                 flex: 1 1 auto;
                 color: inherit;
@@ -375,7 +398,7 @@
 	.stem--actions {
 		display: flex;
 		gap: 0.5em;
-        align-items: baseline;
+        align-items: center;
 
         .stem--action {
             transition: 200ms;
@@ -388,6 +411,15 @@
             }
             &.stem--error {
                 color: rgb(248 148 6);
+            }
+            &.stem--errorLog {
+                color: rgb(189 54 47);
+                opacity: 0;
+                pointer-events: none;
+                transition: 200ms;
+                .fa-exclamation {
+                    color: white;
+                }
             }
         }
 	}
@@ -423,7 +455,7 @@ body .popup .stem--readme {
 
 
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1400px) {
     .stem--filters {
         flex-wrap: wrap;
         justify-content: space-between;
@@ -436,6 +468,8 @@ body .popup .stem--readme {
             font-size: 0.6em;
         }
     }
+}
+@media screen and (max-width: 1000px) {
     .stem--table {
         display: flex;
         flex-direction: column;
@@ -470,6 +504,57 @@ body .popup .stem--readme {
         }
         .stem--actions {
             justify-content: end;
+        }
+    }
+}
+
+
+
+.stem--errorLogPopup {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+
+    .stem--title {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1em;
+
+        .stem--success {
+            background-color: rgb(81, 163, 81);
+        }
+        .stem--failure {
+            background-color: rgb(189, 54, 47);
+        }
+    }
+
+    .stem--errorContent {
+        flex: 1 1 auto;
+
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+
+        text-align: left;
+        overflow: auto;
+
+        .stem--error {
+            background-color: rgb(189 54 47 / 0.5);
+            border: 2px solid rgb(255 255 255 / 0.5);
+            color: white;
+            font-family: var(--monoFontFamily);
+            font-size: smaller;
+
+            .stem--head {
+                border-bottom: 1px solid rgb(255 255 255 / 0.5);;
+                padding: 0.25em;
+            }
+            .stem--stack {
+                padding: 0.5em;
+                white-space: pre-wrap;
+            }
         }
     }
 }
