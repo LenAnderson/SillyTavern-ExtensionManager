@@ -1,3 +1,9 @@
+body.stem--nonDiscord #rm_extensions_block {
+  width: 100vw;
+  height: calc(100dvh - var(--topBarBlockSize));
+  max-height: unset;
+  position: fixed;
+}
 #rm_extensions_block {
   flex-direction: column;
   padding-bottom: 0;

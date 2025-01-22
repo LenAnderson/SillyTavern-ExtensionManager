@@ -1651,3 +1651,15 @@ const init = async()=>{
     }
 };
 await init();
+
+
+let isDiscord;
+const checkDiscord = async()=>{
+    let newIsDiscord = window.getComputedStyle(document.body).getPropertyValue('--nav-bar-width') !== '';
+    if (isDiscord != newIsDiscord) {
+        isDiscord = newIsDiscord;
+        document.body.classList[isDiscord ? 'remove' : 'add']('stem--nonDiscord');
+    }
+    setTimeout(()=>checkDiscord(), 1000);
+};
+checkDiscord();
