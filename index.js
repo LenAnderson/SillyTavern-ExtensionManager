@@ -2,6 +2,7 @@ import { event_types, eventSource, getRequestHeaders, reloadMarkdownProcessor, s
 import { disableExtension, enableExtension, extension_settings, openThirdPartyExtensionMenu } from '../../../extensions.js';
 import { Popup, POPUP_TYPE } from '../../../popup.js';
 import { delay } from '../../../utils.js';
+import { ago } from './src/ago.js';
 
 class Repository {
     /**@type {string}*/ title;
@@ -62,8 +63,7 @@ const appReady = new Promise(resolve=>eventSource.once(event_types.APP_READY, re
 
 
 
-
-/**@type {{
+/** @typedef {{
         display_name:string,
         loading_order:number,
         requires:string[],
@@ -84,7 +84,8 @@ const appReady = new Promise(resolve=>eventSource.once(event_types.APP_READY, re
         isRepo:boolean,
 
         tblRow:HTMLElement,
-    }[]} */
+    }} Manifest */
+/**@type {Manifest[]} */
 let manifests = [];
 /**@type {{
  *      [extension:string]: { time:number, stack:string }[]
@@ -239,6 +240,31 @@ const init = async()=>{
     };
     window.addEventListener('error', (evt)=>handleError(evt));
     window.addEventListener('unhandledrejection', (evt)=>handleError(evt));
+
+    /**
+     *
+     * @param {Manifest} manifest
+     * @param {HTMLElement} btn
+     */
+    const updateCheckedOn = (manifest, btn = null)=>{
+        const checkUpdate = btn ?? /**@type {HTMLElement}*/(manifest.tblRow?.querySelector('.stem--actions > .stem--action.stem--checkUpdate'));
+        if (!checkUpdate) return;
+        const cache = settings.extensionUpdateCheckList.find(it=>it.extension == manifest.name);
+        checkUpdate.title = [
+            'Check for updates',
+            '---',
+            `last checked: ${cache?.checkedOn ? ago(cache.checkedOn) : 'never'}`,
+            cache?.checkedOn ? new Date(cache.checkedOn).toLocaleString() : null,
+        ].filter(it=>it).join('\n');
+    };
+    Promise.resolve().then(async()=>{
+        while (true) {
+            await delay(1000 * 60);
+            for (const manifest of manifests) {
+                updateCheckedOn(manifest);
+            }
+        }
+    });
 
     const goToTab = async(key)=>{
         for (const [k, v] of Object.entries(tabBody)) {
@@ -948,9 +974,10 @@ const init = async()=>{
                                     }
                                     const checkUpdate = document.createElement('div'); {
                                         checkUpdate.classList.add('stem--action');
+                                        checkUpdate.classList.add('stem--checkUpdate');
                                         checkUpdate.classList.add('menu_button');
                                         checkUpdate.classList.add('fa-fw');
-                                        checkUpdate.title = 'Check for updates';
+                                        updateCheckedOn(manifest, checkUpdate);
                                         const i = document.createElement('i'); {
                                             i.classList.add('fa-solid', 'fa-fw', 'fa-rotate');
                                             checkUpdate.append(i);
@@ -981,6 +1008,7 @@ const init = async()=>{
                                             manifest.isRepo = true;
                                             manifest.isUpToDate = data.isUpToDate;
                                             manifest.branch = data.branch;
+                                            updateCheckedOn(manifest, checkUpdate);
                                             branchLabel.textContent = data.branch?.current ?? '';
                                             const branchList = manifest.branch?.all
                                                 ?.filter(it=>it.startsWith('remotes/'))
