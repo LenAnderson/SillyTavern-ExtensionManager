@@ -1094,9 +1094,16 @@ const init = async()=>{
                                                         console.log('[EMP]', data.log);
                                                         content.innerHTML = '';
                                                         for (const commit of data.log) {
+                                                            const versionItem = data.versionLog.find(it=>it.commit == commit.hash);
+                                                            if (versionItem) {
+                                                                const vhead = document.createElement('div'); {
+                                                                    vhead.classList.add('stem--version');
+                                                                    vhead.textContent = versionItem.version;
+                                                                    content.append(vhead);
+                                                                }
+                                                            }
                                                             const item = document.createElement('div'); {
                                                                 item.classList.add('stem--commit');
-                                                                if (data.manifestLog.includes(commit.hash)) item.classList.add('stem--manifest');
                                                                 item.title = commit.hash;
                                                                 const dt = document.createElement('div'); {
                                                                     dt.classList.add('stem--time');

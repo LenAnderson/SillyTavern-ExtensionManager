@@ -542,21 +542,22 @@ body .popup .stem--readme {
     .stem--gitLogContent {
         display: grid;
         grid-template-columns: 0fr 1fr;
-        gap: 1em;
+        column-gap: 1em;
+        row-gap: 0.5em;
         align-items: baseline;
 
         text-align: left;
         overflow: auto;
 
+        .stem--version {
+            grid-column: 1 / 3;
+            background-color: rgb(from var(--SmartThemeQuoteColor) r g b / 0.4);
+            font-weight: bold;
+            margin-bottom: -0.5em;
+            text-align: center;
+        }
         .stem--commit {
             display: contents;
-            &.stem--manifest {
-                .stem--message {
-                    background-color: rgb(from var(--SmartThemeQuoteColor) r g b / 0.4);
-                    font-weight: bold;
-                    margin-top: 2em;
-                }
-            }
 
             .stem--time {
                 font-size: small;
