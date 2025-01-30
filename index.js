@@ -964,6 +964,7 @@ const init = async()=>{
                                             if (cache) {
                                                 cache.checkedOn = Date.now();
                                                 cache.hasUpdate = false;
+                                                saveSettings();
                                             }
                                             item.classList.remove('stem--isBusy');
                                             item.classList.add('stem--mustReload');
