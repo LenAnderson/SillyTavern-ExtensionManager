@@ -295,6 +295,14 @@ body.stem--nonDiscord #rm_extensions_block {
   opacity: 1;
   pointer-events: all;
 }
+.stem--table tr[data-stem--isRepo] .stem--actions .stem--action.stem--gitLog {
+  opacity: 1;
+  pointer-events: all;
+}
+.stem--table tr[data-stem--hasReadme] .stem--actions .stem--action.stem--readme {
+  opacity: 1;
+  pointer-events: all;
+}
 .stem--table tr[data-stem--filter]:not([data-stem--filter="[]"]) {
   display: none;
 }
@@ -381,6 +389,12 @@ body.stem--nonDiscord #rm_extensions_block {
 .stem--table .stem--actions .stem--action.stem--errorLog .fa-exclamation {
   color: white;
 }
+.stem--table .stem--actions .stem--action.stem--gitLog,
+.stem--table .stem--actions .stem--action.stem--readme {
+  opacity: 0;
+  pointer-events: none;
+  transition: 200ms;
+}
 body .popup .stem--readme {
   border: none;
   padding: 0;
@@ -451,6 +465,36 @@ body:has(.stem--mustReload) .stem--reloadWarning {
   .stem--table .stem--actions {
     justify-content: end;
   }
+}
+.stem--gitLogPopup {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+.stem--gitLogPopup .stem--gitLogContent {
+  display: grid;
+  grid-template-columns: 0fr 1fr;
+  gap: 1em;
+  align-items: baseline;
+  text-align: left;
+  overflow: auto;
+}
+.stem--gitLogPopup .stem--gitLogContent .stem--commit {
+  display: contents;
+}
+.stem--gitLogPopup .stem--gitLogContent .stem--commit.stem--manifest .stem--message {
+  background-color: rgb(from var(--SmartThemeQuoteColor) r g b / 0.4);
+  font-weight: bold;
+  margin-top: 2em;
+}
+.stem--gitLogPopup .stem--gitLogContent .stem--commit .stem--time {
+  font-size: small;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+.stem--gitLogPopup .stem--gitLogContent .stem--commit .stem--message {
+  white-space: pre-wrap;
 }
 .stem--errorLogPopup {
   display: flex;

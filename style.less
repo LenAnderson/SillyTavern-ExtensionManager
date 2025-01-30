@@ -335,6 +335,18 @@ body.stem--nonDiscord #rm_extensions_block {
                 pointer-events: all;
             }
         }
+        &[data-stem--isRepo] {
+            .stem--actions .stem--action.stem--gitLog {
+                opacity: 1;
+                pointer-events: all;
+            }
+        }
+        &[data-stem--hasReadme] {
+            .stem--actions .stem--action.stem--readme {
+                opacity: 1;
+                pointer-events: all;
+            }
+        }
         &[data-stem--filter]:not([data-stem--filter="[]"]) {
             display: none;
         }
@@ -428,6 +440,11 @@ body.stem--nonDiscord #rm_extensions_block {
                     color: white;
                 }
             }
+            &.stem--gitLog, &.stem--readme {
+                opacity: 0;
+                pointer-events: none;
+                transition: 200ms;
+            }
         }
 	}
 }
@@ -517,6 +534,41 @@ body .popup .stem--readme {
 
 
 
+.stem--gitLogPopup {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    .stem--gitLogContent {
+        display: grid;
+        grid-template-columns: 0fr 1fr;
+        gap: 1em;
+        align-items: baseline;
+
+        text-align: left;
+        overflow: auto;
+
+        .stem--commit {
+            display: contents;
+            &.stem--manifest {
+                .stem--message {
+                    background-color: rgb(from var(--SmartThemeQuoteColor) r g b / 0.4);
+                    font-weight: bold;
+                    margin-top: 2em;
+                }
+            }
+
+            .stem--time {
+                font-size: small;
+                opacity: 0.5;
+                white-space: nowrap;
+            }
+            .stem--message {
+                white-space: pre-wrap;
+            }
+        }
+    }
+}
 .stem--errorLogPopup {
     display: flex;
     flex-direction: column;

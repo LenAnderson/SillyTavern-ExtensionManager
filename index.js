@@ -23,8 +23,8 @@ class Repository {
 /**@type {{
     repoList: Repository[],
     updateCheckHours: number,
-    extensionUpdateCheckList: {extension:string, checkedOn:number, hasUpdate:boolean, details:{}}[],
-    pluginUpdateCheckList: {plugin:string, checkedOn:number, hasUpdate:boolean, details:{}}[],
+    extensionUpdateCheckList: {extension:string, checkedOn:number, hasUpdate:boolean, details:object}[],
+    pluginUpdateCheckList: {plugin:string, checkedOn:number, hasUpdate:boolean, details:object}[],
 }} */
 const settings = Object.assign({
     /**@type {Repository[]} */
@@ -1001,11 +1001,13 @@ const init = async()=>{
                                                 updateIcon.classList.add('fa-triangle-exclamation');
                                                 update.title = 'Failed to fetch extension status!';
                                                 manifest.isRepo = false;
+                                                manifest.tblRow.removeAttribute('data-stem--isRepo');
                                                 branchLabel.textContent = '';
                                                 branch.title = '';
                                                 return;
                                             }
                                             manifest.isRepo = true;
+                                            manifest.tblRow.setAttribute('data-stem--isRepo', '1');
                                             manifest.isUpToDate = data.isUpToDate;
                                             manifest.branch = data.branch;
                                             updateCheckedOn(manifest, checkUpdate);
@@ -1055,6 +1057,125 @@ const init = async()=>{
                                             return null;
                                         });
                                         wrap.append(checkUpdate);
+                                    }
+                                    const gitLog = document.createElement('div'); {
+                                        gitLog.classList.add('stem--action');
+                                        gitLog.classList.add('stem--gitLog');
+                                        gitLog.classList.add('menu_button');
+                                        gitLog.classList.add('fa-solid', 'fa-fw', 'fa-file-lines');
+                                        gitLog.title = 'Change log';
+                                        gitLog.addEventListener('click', async()=>{
+                                            const dom = document.createElement('div'); {
+                                                dom.classList.add('stem--gitLogPopup');
+                                                const head = document.createElement('h3'); {
+                                                    head.classList.add('stem--title');
+                                                    const text = document.createElement('div'); {
+                                                        text.textContent = manifest.display_name;
+                                                        head.append(text);
+                                                    }
+                                                    dom.append(head);
+                                                }
+                                                const content = document.createElement('div'); {
+                                                    content.classList.add('stem--gitLogContent');
+                                                    content.textContent = 'fetching change log...';
+                                                    fetch('/api/plugins/emp/extensions/log', {
+                                                        method: 'POST',
+                                                        headers: getRequestHeaders(),
+                                                        body: JSON.stringify({
+                                                            extension: manifest.name.slice('third-party/'.length),
+                                                        }),
+                                                    }).then(async(res)=>{
+                                                        const data = await res.json();
+                                                        if (!data.isRepo) {
+                                                            content.textContent = 'not a repo';
+                                                            return;
+                                                        }
+                                                        console.log('[EMP]', data.log);
+                                                        content.innerHTML = '';
+                                                        for (const commit of data.log) {
+                                                            const item = document.createElement('div'); {
+                                                                item.classList.add('stem--commit');
+                                                                if (data.manifestLog.includes(commit.hash)) item.classList.add('stem--manifest');
+                                                                item.title = commit.hash;
+                                                                const dt = document.createElement('div'); {
+                                                                    dt.classList.add('stem--time');
+                                                                    dt.textContent = new Date(commit.date).toLocaleString();
+                                                                    item.append(dt);
+                                                                }
+                                                                const mes = document.createElement('div'); {
+                                                                    mes.classList.add('stem--message');
+                                                                    mes.textContent = commit.message;
+                                                                    item.append(mes);
+                                                                }
+                                                                content.append(item);
+                                                            }
+                                                        }
+                                                    });
+                                                    dom.append(content);
+                                                }
+                                            }
+                                            const dlg = new Popup(dom, POPUP_TYPE.TEXT, null, {
+                                                wide: true,
+                                                wider: true,
+                                                large: true,
+                                            });
+                                            dlg.show();
+                                        });
+                                        wrap.append(gitLog);
+                                        if (settings.extensionUpdateCheckList.find(it=>it.extension == manifest.name)?.details?.isRepo) {
+                                            manifest.tblRow?.setAttribute('data-stem--isRepo', '1');
+                                        }
+                                    }
+                                    const readme = document.createElement('div'); {
+                                        readme.classList.add('stem--action');
+                                        readme.classList.add('stem--readme');
+                                        readme.classList.add('menu_button');
+                                        readme.classList.add('fa-solid', 'fa-fw', 'fa-circle-question');
+                                        readme.title = 'Readme';
+                                        readme.addEventListener('click', async()=>{
+                                            const dom = document.createElement('div'); {
+                                                dom.classList.add('stem--readmePopup');
+                                                const content = document.createElement('div'); {
+                                                    content.classList.add('stem--readmeContent');
+                                                    content.textContent = 'fetching readme...';
+                                                    fetch(`/scripts/extensions/${manifest.name}/README.md`).then(async(res)=>{
+                                                        const md = await res.text();
+                                                        const converter = reloadMarkdownProcessor();
+                                                        const readme = converter.makeHtml(md);
+                                                        const html = `
+                                                            <div class="mes stem--readme"><div class="mes_text">${readme}</div></div>
+                                                        `;
+                                                        content.innerHTML = html;
+                                                        const url = `/scripts/extensions/${manifest.name}`;
+                                                        for (const a of /**@type {HTMLAnchorElement[]}*/([...content.querySelectorAll('a')])) {
+                                                            if (a.href.startsWith(`${location.origin}#`)) continue;
+                                                            a.target = '_blank';
+                                                            if (a.href.startsWith('/')) continue;//a.href = `https://github.com${a.href}`;
+                                                            else if (!a.href.includes('://')) a.href = `${url}/${a.href}`;
+                                                            else if (a.href.startsWith(location.origin)) a.href = `${url}/${a.href.slice(location.origin.length)}`;
+                                                        }
+                                                        for (const el of /**@type {HTMLImageElement[]}*/([...content.querySelectorAll('[src]')])) {
+                                                            if (el.src.startsWith('/')) continue;//el.src = `https://github.com${el.src}`;
+                                                            else if (el.src.startsWith(location.origin)) el.src = `${url}/${el.src.slice(location.origin.length)}`;
+                                                        }
+                                                    });
+                                                    dom.append(content);
+                                                }
+                                            }
+                                            const dlg = new Popup(dom, POPUP_TYPE.TEXT, null, {
+                                                wide: true,
+                                                wider: true,
+                                                large: true,
+                                                allowVerticalScrolling: true,
+                                            });
+                                            dlg.show();
+                                        });
+                                        wrap.append(readme);
+                                        fetch(`/scripts/extensions/${manifest.name}/README.md`, { method:'HEAD' }).then((res)=>{
+                                            if (res.ok) {
+                                                manifest.tblRow?.setAttribute('data-stem--hasReadme', '1');
+                                            }
+                                        });
                                     }
                                     const errorLog = document.createElement('div'); {
                                         errorLog.classList.add('stem--action');
