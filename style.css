@@ -6,43 +6,54 @@ body.stem--nonDiscord #rm_extensions_block {
 }
 #rm_extensions_block {
   flex-direction: column;
-  padding-bottom: 0;
+  padding: 0;
 }
 #rm_extensions_block[style*="display: block"] {
   display: flex !important;
 }
+#rm_extensions_block > .stem--head {
+  display: none;
+}
 #rm_extensions_block .extensions_block {
   container-type: inline-size;
   overflow: auto;
+  padding: 0.5em 0 0 0.5em;
 }
-@container (width < 1000px) {
-  #extensions_settings,
-  #extensions_settings2 {
-    flex-basis: 100%;
-  }
-}
-.popup:has(.stem--readme) {
-  height: auto !important;
-}
-.stem--head .menu_button,
-.stem--head label {
-  display: none;
-}
-.stem--tabs {
+.stem--tabUi {
+  --primaryBgColRgb: rgb(var(--primaryBgCol));
+  --bgColor: var(--primaryBgColRgb, var(--SmartThemeBlurTintColor));
+  --accentColor: rgb(from var(--SmartThemeQuoteColor) r g b / 1);
+  flex: 1 1 auto;
   display: flex;
-  justify-content: start;
+  flex-direction: column;
+  margin-top: 0.5em;
+  overflow: hidden;
+}
+.stem--tabUi .stem--tabRow {
+  display: flex;
+  flex-direction: row;
   gap: 1em;
   border-bottom: 2px solid var(--SmartThemeBorderColor);
   padding: 0 1em;
 }
-.stem--sep {
+.stem--tabUi .stem--tabRow .stem--primary,
+.stem--tabUi .stem--tabRow .stem--actions,
+.stem--tabUi .stem--tabRow .stem--secondary {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+.stem--tabUi .stem--tabRow .stem--separator {
   flex: 1 1 auto;
 }
-.stem--tab {
+.stem--tabUi .stem--tabRow .stem--secondary .stem--label {
+  display: none;
+}
+.stem--tabUi .stem--tabRow .stem--tab {
   display: flex;
   align-items: center;
   gap: 0.5em;
-  background-color: rgb(from var(--SmartThemeBlurTintColor) r g b / 1);
+  background-color: var(--bgColor);
   border: 2px solid rgb(from var(--SmartThemeBorderColor) r g b / 0.5);
   border-bottom-color: rgb(from var(--SmartThemeBorderColor) r g b / 1);
   border-radius: 6px 6px 0 0;
@@ -54,206 +65,101 @@ body.stem--nonDiscord #rm_extensions_block {
   top: 2px;
   transition: 200ms;
 }
-.stem--tab.stem--button {
+.stem--tabUi .stem--tabRow .stem--tab:hover {
+  border-color: rgb(from var(--SmartThemeBorderColor) r g b / 1);
+  color: rgb(from var(--SmartThemeBodyColor) r g b / 1);
+}
+.stem--tabUi .stem--tabRow .stem--tab.stem--action {
   aspect-ratio: 1;
   height: 1lh;
   border-radius: 6px;
   align-self: center;
   padding: 1px;
 }
-.stem--tab:hover {
-  border-color: rgb(from var(--SmartThemeBorderColor) r g b / 1);
+.stem--tabUi .stem--tabRow .stem--tab.stem--action .stem--label {
+  display: none;
+}
+.stem--tabUi .stem--tabRow .stem--tab.stem--isSelected {
+  border-color: var(--accentColor);
+  border-bottom-color: var(--bgColor);
   color: rgb(from var(--SmartThemeBodyColor) r g b / 1);
 }
-.stem--tab.stem--active {
-  border-color: rgb(from var(--SmartThemeQuoteColor) r g b / 1);
-  border-bottom-color: rgb(from var(--SmartThemeBlurTintColor) r g b / 1);
-  color: rgb(from var(--SmartThemeBodyColor) r g b / 1);
-}
-.stem--tab.stem--active::before {
+.stem--tabUi .stem--tabRow .stem--tab.stem--isSelected::before {
   content: '';
   position: absolute;
   bottom: -2px;
   left: -1em;
   width: 1em;
   height: 2px;
-  background: linear-gradient(-90deg, rgb(from var(--SmartThemeQuoteColor) r g b / 1), transparent);
+  background: linear-gradient(-90deg, var(--accentColor), transparent);
 }
-.stem--tab.stem--active::after {
+.stem--tabUi .stem--tabRow .stem--tab.stem--isSelected::after {
   content: '';
   position: absolute;
   bottom: -2px;
   right: -1em;
   width: 1em;
   height: 2px;
-  background: linear-gradient(90deg, rgb(from var(--SmartThemeQuoteColor) r g b / 1), transparent);
+  background: linear-gradient(90deg, var(--accentColor), transparent);
 }
-.stem--tab.stem--active .fa-fw {
-  color: var(--SmartThemeQuoteColor);
+.stem--tabUi .stem--tabRow .stem--tab.stem--isSelected .fa-fw {
+  color: var(--accentColor);
 }
-.stem--body {
-  background-color: rgb(from var(--SmartThemeBlurTintColor) r g b / 1);
+.stem--tabUi .stem--bodyContainer {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+.stem--tabUi .stem--body {
+  display: none;
+  flex-direction: column;
+  background-color: rgb(var(--primaryBgCol, --SmartThemeBlurTintColor));
   border: 2px solid rgb(from var(--SmartThemeBorderColor) r g b / 1);
   border-top: none;
   border-radius: 0 0 6px 6px;
-  display: none;
   height: 100%;
   overflow: auto;
-  padding: 0.5em;
 }
-.stem--body.stem--active {
+.stem--tabUi .stem--body.stem--isSelected {
   display: flex;
 }
-.stem--body.stem--manageExtensions {
-  flex-direction: column;
-  padding: 0;
-}
-.stem--body.stem--managePlugins {
-  flex-direction: column;
-  padding: 0;
-}
-.stem--body.stem--managePlugins .stem--table {
+.stem--filterPanel {
   flex: 0 0 auto;
-}
-.stem--body.stem--catalog {
-  flex-direction: column;
-  padding: 0.5em 0;
-}
-.stem--body.stem--catalog .stem--list {
-  --tileSize: 250;
-  flex: 1 1 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(calc(var(--tileSize) * 1px), 1fr));
-  gap: 1em;
-  overflow: auto;
-}
-.stem--body.stem--catalog .stem--list .stem--item {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  background-color: color-mix(in srgb, #808080 30%, var(--SmartThemeBlurTintColor));
-  border-radius: 5px;
-}
-.stem--body.stem--catalog .stem--list .stem--item.stem--installed {
-  opacity: 0.5;
-}
-.stem--body.stem--catalog .stem--list .stem--item:hover > .stem--preview {
-  opacity: 1;
-  filter: saturate(1);
-}
-.stem--body.stem--catalog .stem--list .stem--item .stem--preview {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  aspect-ratio: 3 / 1;
-  background-color: color-mix(in srgb, #808080 75%, var(--SmartThemeBlurTintColor));
-  background-size: cover;
-  background-position: center;
-  border-radius: 5px 5px 0 0;
-  container-type: inline-size;
-  filter: saturate(0.5);
-  opacity: 0.5;
-  transition: 200ms;
-}
-.stem--body.stem--catalog .stem--list .stem--item .stem--preview:before {
-  font-size: 30cqw;
-  opacity: 0.25;
-}
-.stem--body.stem--catalog .stem--list .stem--item .stem--name {
-  font-size: 1.25em;
-  padding: 0 0.25em;
-}
-.stem--body.stem--catalog .stem--list .stem--item .stem--author {
-  color: var(--SmartThemeEmColor);
-  font-size: smaller;
-  padding: 0 0.25em;
-}
-.stem--body.stem--catalog .stem--list .stem--item .stem--description {
-  flex: 1 1 auto;
-  margin: 5px 0;
-  font-size: small;
-  padding: 0 0.25em;
-}
-.stem--body.stem--catalog .stem--list .stem--item .stem--tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em;
-  padding: 0.25em;
-}
-.stem--body.stem--catalog .stem--list .stem--item .stem--tag {
-  background: black;
-  border-radius: 0.5lh;
-  padding: 0 0.5lh;
-  font-size: 0.75em;
-  cursor: default;
-}
-.stem--body.stem--catalog .stem--list .stem--item .stem--actions {
-  display: flex;
-  gap: 0.5em;
-  padding: 0 0.25em;
-}
-.stem--body.stem--raw {
-  flex-direction: column;
-}
-.stem--body.stem--raw .stem--actions {
-  display: flex;
-  gap: 1em;
-  justify-content: flex-start;
-  align-items: baseline;
-}
-.stem--body.stem--raw .stem--actions .text_pole {
-  width: auto;
-}
-.stem--body.stem--raw .stem--actions .stem--sep {
-  flex: 1 1 auto;
-}
-.stem--body.stem--raw textarea {
-  flex: 1 1 auto;
-}
-.stem--body.stem--config {
-  flex-direction: column;
-}
-.stem--body.stem--config .stem--actions {
-  display: flex;
-  gap: 1em;
-  justify-content: flex-end;
-}
-.stem--body.stem--config textarea {
-  flex: 1 1 auto;
-}
-.stem--filters {
-  display: flex;
+  flex-direction: row;
   gap: 1em;
   align-items: baseline;
-  background-color: var(--SmartThemeBorderColor);
+  background-color: var(--bgColor);
   padding: 0.25em 0.5em;
 }
-.stem--filters .stem--search {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5em;
-  flex: 1 1 auto;
-}
-.stem--filters .stem--group {
+.stem--filterPanel .stem--filterGroup {
   display: flex;
   gap: 1em;
   align-items: baseline;
+  padding-top: 0.8em;
   position: relative;
-  padding-top: 0.7em;
 }
-.stem--filters .stem--groupLabel {
+.stem--filterPanel .stem--filterGroup:has(.stem--search),
+.stem--filterPanel .stem--filterGroup .stem--search {
+  flex: 1 1 auto;
+}
+.stem--filterPanel .stem--filterGroup .stem--filterGroupLabel {
   position: absolute;
   top: 0;
   left: 0;
-  font-size: 0.7em;
-  line-height: 1;
+  font-size: 0.6em;
   opacity: 0.5;
 }
-.stem--filters .stem--filter {
+.stem--filterPanel .stem--filter {
   display: flex;
-  align-items: baseline;
   gap: 0.5em;
+  align-items: baseline;
   font-size: small;
+}
+.stem--tabUi .stem--body:has(.stem--tableWrap) {
+  overflow: hidden;
+}
+.stem--tableWrap {
+  overflow: auto;
 }
 .stem--table {
   border: 0;
@@ -263,8 +169,14 @@ body.stem--nonDiscord #rm_extensions_block {
   white-space: nowrap;
   width: 100%;
 }
+.stem--table.stem--isLoading .stem--spinner {
+  display: table-row;
+}
+.stem--table .stem--spinner {
+  display: none;
+}
 .stem--table thead {
-  background-color: var(--SmartThemeBorderColor);
+  background-color: var(--bgColor);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -272,42 +184,53 @@ body.stem--nonDiscord #rm_extensions_block {
 .stem--table tr {
   border-bottom: 5px solid var(--SmartThemeBorderColor);
   transition: 200ms;
-  background-color: var(--primaryBgCol, var(--SmartThemeBlurTintColor));
+  background-color: var(--bgColor);
 }
 .stem--table tr:hover {
-  background-color: color-mix(in srgb, var(--SmartThemeQuoteColor) 50%, transparent 50%);
+  background-color: color-mix(in srgb, var(--accentColor) 50%, transparent 50%);
 }
 .stem--table tr.stem--isBusy {
   pointer-events: none;
   opacity: 0.75;
   filter: grayscale(1);
 }
-.stem--table tr.stem--mustReload {
+.stem--table tr.stem--isModified {
   background-color: rgba(189, 54, 47, 0.5);
 }
 .stem--table tr.stem--isDisabled {
   opacity: 0.5;
 }
-.stem--table tr.stem--isDisabled .stem--toggle {
+.stem--table tr.stem--isDisabled .stem--actions .stem--action.stem--toggle {
   color: #bd362f;
 }
-.stem--table tr[data-stem--hasErrors] .stem--actions .stem--action.stem--errorLog {
+.stem--table tr.stem--hasUpdate .stem--actions .stem--action.stem--update {
+  color: #2f96b4;
+}
+.stem--table tr.stem--noUpdate .stem--actions .stem--action.stem--update {
+  opacity: 0.25;
+}
+.stem--table tr.stem--isRepo .stem--actions .stem--action.stem--gitLog {
   opacity: 1;
   pointer-events: all;
 }
-.stem--table tr[data-stem--isRepo] .stem--actions .stem--action.stem--gitLog {
+.stem--table tr.stem--isSparse [data-property="Branch"] .stem--action.stem--branchButton {
+  color: #f89406;
+  opacity: 1;
+}
+.stem--table tr.stem--noRepo .stem--actions .stem--action.stem--update {
+  color: #f89406;
+  opacity: 0.5;
+}
+.stem--table tr.stem--hasReadme .stem--actions .stem--action.stem--readme {
   opacity: 1;
   pointer-events: all;
 }
-.stem--table tr[data-stem--hasReadme] .stem--actions .stem--action.stem--readme {
+.stem--table tr.stem--hasErrors .stem--actions .stem--action.stem--errorLog {
   opacity: 1;
   pointer-events: all;
 }
-.stem--table tr[data-stem--filter]:not([data-stem--filter="[]"]) {
+.stem--table tr[data-filter]:not([data-filter="[]"]) {
   display: none;
-}
-.stem--table tr .stem--toggle {
-  color: #51a351;
 }
 .stem--table th,
 .stem--table td {
@@ -326,10 +249,10 @@ body.stem--nonDiscord #rm_extensions_block {
 .stem--table [data-property="Version"] {
   text-align: right;
 }
-.stem--table [data-property="Branch"]:not([data-count]) .stem--action,
-.stem--table [data-property="Branch"][data-count="0"] .stem--action,
-.stem--table [data-property="Branch"][data-count="1"] .stem--action {
-  display: none;
+.stem--table [data-property="Branch"] .stem--branchButton:not([data-count]),
+.stem--table [data-property="Branch"] .stem--branchButton[data-count="0"],
+.stem--table [data-property="Branch"] .stem--branchButton[data-count="1"] {
+  opacity: 0.5;
 }
 .stem--table [data-property="Branch"] .stem--branchLabel {
   flex: 1 1 auto;
@@ -344,8 +267,9 @@ body.stem--nonDiscord #rm_extensions_block {
 .stem--table [data-property="URL"] .stem--urlWrap {
   display: flex;
   align-items: center;
-  position: absolute;
   inset: 0;
+  padding: 0 1em;
+  position: absolute;
 }
 .stem--table [data-property="URL"] .stem--urlWrap a {
   flex: 1 1 auto;
@@ -370,15 +294,8 @@ body.stem--nonDiscord #rm_extensions_block {
 .stem--table .stem--actions .stem--action {
   transition: 200ms;
 }
-.stem--table .stem--actions .stem--action.stem--noUpdate {
+.stem--table .stem--actions .stem--action.stem--toggle {
   color: #51a351;
-  opacity: 0.5;
-}
-.stem--table .stem--actions .stem--action.stem--hasUpdate {
-  color: #2f96b4;
-}
-.stem--table .stem--actions .stem--action.stem--error {
-  color: #f89406;
 }
 .stem--table .stem--actions .stem--action.stem--errorLog {
   color: #bd362f;
@@ -395,76 +312,22 @@ body.stem--nonDiscord #rm_extensions_block {
   pointer-events: none;
   transition: 200ms;
 }
+[data-stem--tab="config"] .stem--actions {
+  display: flex;
+  gap: 1em;
+  justify-content: flex-end;
+}
+[data-stem--tab="config"] textarea {
+  flex: 1 1 auto;
+}
+.popup:has(.stem--readme) {
+  height: auto !important;
+}
 body .popup .stem--readme {
+  background-color: transparent;
   border: none;
   padding: 0;
   text-align: left;
-}
-.stem--reloadWarning {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  background-color: rgba(255, 0, 0, 0.5);
-  color: white;
-  pointer-events: none;
-  text-align: center;
-  font-weight: bold;
-  z-index: 60000;
-  transform: scaleY(0);
-  transition: 200ms;
-  transform-origin: top center;
-}
-body:has(.stem--mustReload) .stem--reloadWarning {
-  transform: scaleY(1);
-}
-@media screen and (max-width: 1400px) {
-  .stem--filters {
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding-bottom: 1em;
-    background-color: var(--SmartThemeBorderColor);
-  }
-  .stem--filters .stem--search {
-    flex-basis: 100%;
-  }
-  .stem--filters .stem--filter {
-    font-size: 0.6em;
-  }
-}
-@media screen and (max-width: 1000px) {
-  .stem--table {
-    display: flex;
-    flex-direction: column;
-  }
-  .stem--table thead {
-    display: none;
-  }
-  .stem--table tbody {
-    display: contents;
-  }
-  .stem--table .stem--item {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .stem--table [data-property="Name"] {
-    flex-basis: calc(100% - 3em);
-  }
-  .stem--table [data-property] {
-    width: auto;
-  }
-  .stem--table [data-property="Source"] {
-    flex-basis: 3em;
-  }
-  .stem--table [data-property="Actions"] {
-    flex-basis: 100%;
-  }
-  .stem--table [data-property="URL"] {
-    flex: 1 1 auto;
-  }
-  .stem--table .stem--actions {
-    justify-content: end;
-  }
 }
 .stem--gitLogPopup {
   display: flex;
