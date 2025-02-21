@@ -8,29 +8,18 @@ import { log } from '../lib/console.js';
 import { ExtensionError } from './ExtensionError.js';
 import { ExtensionManifest } from './ExtensionManifest.js';
 import { Manager } from './Manager.js';
+import { STEM_ITEM_EVENT } from './STEMItem.js';
+/**
+ * @typedef {import('./STEMItem.js').STEMItem} STEMItem
+ */
 
+
+/**
+ * @implements {STEMItem}
+ */
 export class Extension extends ExtensionManifest {
-    /** @readonly */
-    /** @enum {string} */
-    static EVENT = {
-        /** enabled / disabled (this.isDisabled) */
-        STATE: 'state',
-        /** extension has been installed */
-        INSTALL: 'install',
-        /** extension has been uninstalled */
-        UNINSTALL: 'uninstall',
-        /** git status is being checked */
-        GIT_STATUS_CHECK: 'gitStatusCheck',
-        /** git status has been updated */
-        GIT_STATUS: 'gitStatus',
-        /** async task started or stopped (this.isBusy) */
-        BUSY: 'busy',
-        /** extension requires browser refresh (this.isModified) */
-        MODIFIED: 'modified',
-        /** exception from this extension has been caught */
-        ERROR: 'error',
-    };
-
+    /**@type {EventEmitter} */
+    static eventSource = new EventEmitter();
     /**@type {Extension[]} */
     static cache = [];
     static cachePromise;
@@ -53,15 +42,26 @@ export class Extension extends ExtensionManifest {
         } else {
             this.cache.splice(insertIdx, 0, instance);
         }
-        instance.eventSource.on(Extension.EVENT.UNINSTALL, ()=>{
+        instance.eventSource.on(STEM_ITEM_EVENT.UNINSTALL, ()=>{
             const idx = this.cache.indexOf(instance);
             if (idx > -1) {
                 this.cache.splice(idx, 1);
             }
+            this.eventSource.emit(STEM_ITEM_EVENT.UNINSTALL, instance);
+        });
+        instance.eventSource.on(STEM_ITEM_EVENT.GIT_STATUS, ()=>{
+            this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS, instance);
         });
         if (!settings.extensionList.includes(instance)) {
             settings.extensionList.push(instance);
             settings.save();
+        }
+        if (!instance.isCore) {
+            const lastCheck = instance.checkedOn ?? 0;
+            const targetTime = lastCheck + (1000 * 60 * 60 * settings.updateCheckHours);
+            if (targetTime < Date.now()) {
+                instance.checkForUpdate();
+            }
         }
         return instance;
     }
@@ -104,7 +104,7 @@ export class Extension extends ExtensionManifest {
     set isModified(value) {
         if (this.#isModified != value) {
             this.#isModified = value;
-            this.eventSource.emit(Extension.EVENT.MODIFIED);
+            this.eventSource.emit(STEM_ITEM_EVENT.MODIFIED);
         }
     }
 
@@ -117,7 +117,7 @@ export class Extension extends ExtensionManifest {
     set isBusy(value) {
         if (this.#isBusy != value) {
             this.#isBusy = value;
-            this.eventSource.emit(Extension.EVENT.BUSY);
+            this.eventSource.emit(STEM_ITEM_EVENT.BUSY);
             this.busyPromiseResolver?.();
             if (value) {
                 const { promise, resolve } = Promise.withResolvers();
@@ -172,7 +172,7 @@ export class Extension extends ExtensionManifest {
         if (response.ok) {
             const result = await response.json();
             if (result.success) {
-                this.eventSource.emit(Extension.EVENT.UNINSTALL);
+                this.eventSource.emit(STEM_ITEM_EVENT.UNINSTALL);
             }
         }
         this.isBusy = false;
@@ -189,17 +189,17 @@ export class Extension extends ExtensionManifest {
             this.isDisabledNow = true;
         }
         this.isModified = true;
-        this.eventSource.emit(Extension.EVENT.STATE);
+        this.eventSource.emit(STEM_ITEM_EVENT.STATE);
         this.isBusy = false;
     }
 
     async checkForUpdate() {
         while (this.busyPromise) await this.busyPromise;
         this.isBusy = true;
-        this.eventSource.emit(Extension.EVENT.GIT_STATUS_CHECK);
+        this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS_CHECK);
         const data = await Manager.queueForUpdateCheck(this);
         this.applyGitStatus(data);
-        this.eventSource.emit(Extension.EVENT.GIT_STATUS);
+        this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS);
         settings.save();
         this.isBusy = false;
     }
@@ -207,6 +207,7 @@ export class Extension extends ExtensionManifest {
         if (!data?.isRepo) {
             this.isRepo = data.isRepo;
             this.branch = null;
+            this.checkedOn = Date.now();
         } else {
             this.isRepo = true;
             this.isSparse = data.isSparse;
@@ -214,6 +215,7 @@ export class Extension extends ExtensionManifest {
             this.branch = data.branch;
             this.checkedOn = Date.now();
             this.updateLog = data.log;
+            this.repo = data.remoteUrl;
         }
     }
 
@@ -221,7 +223,7 @@ export class Extension extends ExtensionManifest {
         while (this.busyPromise) await this.busyPromise;
         if (this.isUpToDate) return;
         this.isBusy = true;
-        this.eventSource.emit(Extension.EVENT.GIT_STATUS_CHECK);
+        this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS_CHECK);
         const response = await fetch('/api/plugins/emp/extensions/update', {
             method: 'POST',
             headers: getRequestHeaders(),
@@ -236,7 +238,7 @@ export class Extension extends ExtensionManifest {
             }
         }
         this.isModified = true;
-        this.eventSource.emit(Extension.EVENT.GIT_STATUS);
+        this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS);
         settings.save();
         this.isBusy = false;
     }
@@ -244,7 +246,7 @@ export class Extension extends ExtensionManifest {
     async unSparse() {
         while (this.busyPromise) await this.busyPromise;
         this.isBusy = true;
-        this.eventSource.emit(Extension.EVENT.GIT_STATUS_CHECK);
+        this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS_CHECK);
         const response = await fetch('/api/plugins/emp/extensions/unSparse', {
             method: 'POST',
             headers: getRequestHeaders(),
@@ -258,7 +260,7 @@ export class Extension extends ExtensionManifest {
                 this.applyGitStatus(result.data);
             }
         }
-        this.eventSource.emit(Extension.EVENT.GIT_STATUS);
+        this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS);
         settings.save();
         this.isBusy = false;
     }
@@ -266,7 +268,7 @@ export class Extension extends ExtensionManifest {
     async switchBranch(branch) {
         while (this.busyPromise) await this.busyPromise;
         this.isBusy = true;
-        this.eventSource.emit(Extension.EVENT.GIT_STATUS_CHECK);
+        this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS_CHECK);
         const response = await fetch('/api/plugins/emp/extensions/switchBranch', {
             method: 'POST',
             headers: getRequestHeaders(),
@@ -282,7 +284,7 @@ export class Extension extends ExtensionManifest {
             }
         }
         this.isModified = true;
-        this.eventSource.emit(Extension.EVENT.GIT_STATUS);
+        this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS);
         settings.save();
         this.isBusy = false;
     }
@@ -471,6 +473,6 @@ export class Extension extends ExtensionManifest {
 
     addError(error) {
         this.errorList.push(error);
-        this.eventSource.emit(Extension.EVENT.ERROR);
+        this.eventSource.emit(STEM_ITEM_EVENT.ERROR);
     }
 }

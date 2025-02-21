@@ -29,9 +29,10 @@ body.stem--nonDiscord #rm_extensions_block {
 
 
 
+
 .stem--tabUi {
     --primaryBgColRgb: rgb(var(--primaryBgCol));
-    --bgColor: var(--primaryBgColRgb, var(--SmartThemeBlurTintColor));
+    --bgColor: color-mix(in srgb, white 3%, var(--primaryBgColRgb, var(--SmartThemeBlurTintColor)));
     --accentColor: rgb(from var(--SmartThemeQuoteColor) r g b / 1);
     flex: 1 1 auto;
 
@@ -69,7 +70,7 @@ body.stem--nonDiscord #rm_extensions_block {
             gap: 0.5em;
 
             background-color: var(--bgColor);
-            border: 2px solid rgb(from var(--SmartThemeBorderColor) r g b / 0.5);
+            border: 2px solid rgb(from var(--SmartThemeBorderColor) r g b / 1);
             border-bottom-color: rgb(from var(--SmartThemeBorderColor) r g b / 1);
             border-radius: 6px 6px 0 0;
             color: rgb(from var(--SmartThemeBodyColor) r g b / 0.5);
@@ -136,7 +137,7 @@ body.stem--nonDiscord #rm_extensions_block {
         display: none;
         flex-direction: column;
 
-        background-color: rgb(var(--primaryBgCol, --SmartThemeBlurTintColor));
+        background-color: var(--bgColor);
         border: 2px solid rgb(from var(--SmartThemeBorderColor) r g b / 1);
         border-top: none;
         border-radius: 0 0 6px 6px;
@@ -149,7 +150,6 @@ body.stem--nonDiscord #rm_extensions_block {
         }
     }
 }
-
 
 
 .stem--filterPanel {
@@ -173,6 +173,9 @@ body.stem--nonDiscord #rm_extensions_block {
 
         &:has(.stem--search), .stem--search {
             flex: 1 1 auto;
+            .text_pole {
+                font-size: inherit;
+            }
         }
 
         .stem--filterGroupLabel {
@@ -191,6 +194,9 @@ body.stem--nonDiscord #rm_extensions_block {
         font-size: small;
     }
 }
+
+
+
 
 .stem--tabUi .stem--body:has(.stem--tableWrap) {
     overflow: hidden;
@@ -266,7 +272,11 @@ body.stem--nonDiscord #rm_extensions_block {
                 opacity: 1;
             }
         }
-        &.stem--noRepo {
+        &.stem--noRepo, &.stem--isCore {
+            [data-property="Branch"] .stem--action.stem--branchButton {
+                opacity: 0;
+                pointer-events: none;
+            }
             .stem--actions .stem--action.stem--update {
                 color: rgb(248 148 6);
                 opacity: 0.5;
@@ -290,7 +300,7 @@ body.stem--nonDiscord #rm_extensions_block {
     }
 	th, td {
 		text-align: left;
-		padding: 0 1em;
+		padding: 0 1rem;
 		width: 0;
 	}
 	td {
@@ -304,6 +314,9 @@ body.stem--nonDiscord #rm_extensions_block {
 	}
 	[data-property="Version"] {
 		text-align: right;
+        &:is(tbody *) {
+            font-family: var(--monoFontFamily);
+        }
 	}
 	[data-property="Branch"] {
         .stem--branchButton {
@@ -325,7 +338,7 @@ body.stem--nonDiscord #rm_extensions_block {
             display: flex;
 			align-items: center;
             inset: 0;
-            padding: 0 1em;
+            padding: 0 1rem;
             position: absolute;
             a {
                 flex: 1 1 auto;
@@ -356,6 +369,7 @@ body.stem--nonDiscord #rm_extensions_block {
         align-items: center;
 
         .stem--action {
+            height: 2em;
             transition: 200ms;
             &.stem--toggle {
                 color: rgb(81 163 81);
@@ -378,6 +392,123 @@ body.stem--nonDiscord #rm_extensions_block {
 	}
 }
 
+
+
+.stem--tagPanel {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    flex-wrap: wrap;
+    padding: 0 0.5em 0.5em 0.5em;
+
+    .stem--tag {
+        background: black;
+        border-radius: 0.5lh;
+        padding: 0 0.5lh;
+        font-size: small;
+        cursor: default;
+    }
+}
+.stem--list {
+    --tileSize: 250;
+
+    flex: 1 1 auto;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(calc(var(--tileSize) * 1px), 1fr));
+    gap: 1em;
+
+    overflow: auto;
+
+    .stem--item {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+
+        background-color: color-mix(in srgb, rgb(128 128 128) 30%, var(--SmartThemeBlurTintColor));
+        border-radius: 5px;
+        cursor: default;
+        &[data-filter]:not([data-filter="[]"]) {
+            display: none;
+        }
+        &.stem--isBusy {
+			pointer-events: none;
+			opacity: 0.75;
+			filter: grayscale(1);
+        }
+        &.stem--isInstalled {
+            opacity: 0.5;
+        }
+        &:hover {
+            > .stem--preview {
+                opacity: 1;
+                filter: saturate(1);
+            }
+        }
+
+        .stem--preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            aspect-ratio: 3 / 1;
+            background-color: color-mix(in srgb, rgb(128 128 128) 75%, var(--SmartThemeBlurTintColor));
+            background-size: cover;
+            background-position: center;
+            border-radius: 5px 5px 0 0;
+            container-type: inline-size;
+            filter: saturate(0.5);
+            opacity: 0.5;
+            transition: 200ms;
+            &:before {
+                font-size: 30cqw;
+                opacity: 0.25;
+            }
+        }
+        .stem--name {
+            font-size: 1.25em;
+            padding: 0 0.25em;
+        }
+        .stem--author {
+            color: var(--SmartThemeEmColor);
+            font-size: smaller;
+            padding: 0 0.25em;
+        }
+        .stem--description {
+            flex: 1 1 auto;
+
+            margin: 5px 0;
+            font-size: small;
+            padding: 0 0.25em;
+        }
+        .stem--tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5em;
+            padding: 0.25em;
+        }
+        .stem--tag {
+            background: black;
+            border-radius: 0.5lh;
+            padding: 0 0.5lh;
+            font-size: 0.75em;
+            cursor: default;
+        }
+        .stem--actions {
+            display: flex;
+            gap: 0.5em;
+            padding: 0 0.25em;
+
+            .stem--sep {
+                flex: 1 1 auto;
+            }
+        }
+    }
+}
+
+
+
+
 [data-stem--tab="config"] {
     .stem--actions {
         display: flex;
@@ -388,6 +519,8 @@ body.stem--nonDiscord #rm_extensions_block {
         flex: 1 1 auto;
     }
 }
+
+
 
 
 .popup:has(.stem--readme) {
@@ -439,6 +572,9 @@ body .popup .stem--readme {
     }
 }
 
+.popup:has(.stem--errorLogPopup) {
+	width: unset;
+}
 .stem--errorLogPopup {
     display: flex;
     flex-direction: column;

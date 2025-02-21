@@ -11,6 +11,8 @@ import { ManageExtensionsTab } from './src/tabs/ManageExtensionsTab.js';
 import { Tab } from './src/ui/Tab.js';
 import { TabAction } from './src/ui/TabAction.js';
 import { TabUi } from './src/ui/TabUi.js';
+import { ManagePluginsTab } from './src/tabs/ManagePluginsTab.js';
+import { CatalogTab } from './src/tabs/CatalogTab.js';
 
 const appReady = new Promise(resolve=>eventSource.once(event_types.APP_READY, resolve));
 
@@ -102,20 +104,10 @@ const init = async()=>{
         tabs.addTab(new ManageExtensionsTab());
     }
     {
-        const tab = new Tab();
-        tab.id = 'managePlugins';
-        tab.icon = 'puzzle-piece';
-        tab.label = 'Plugins';
-        tab.title = 'Manage installed server plugins';
-        tabs.addTab(tab);
+        tabs.addTab(new ManagePluginsTab());
     }
     {
-        const tab = new Tab();
-        tab.id = 'catalog';
-        tab.icon = 'book-open';
-        tab.label = 'Catalog';
-        tab.title = 'Install extensions and plugins from catalog';
-        tabs.addTab(tab);
+        tabs.addTab(new CatalogTab());
     }
     {
         const action = new TabAction();

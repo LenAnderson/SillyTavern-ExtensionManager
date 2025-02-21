@@ -21,7 +21,7 @@ body.stem--nonDiscord #rm_extensions_block {
 }
 .stem--tabUi {
   --primaryBgColRgb: rgb(var(--primaryBgCol));
-  --bgColor: var(--primaryBgColRgb, var(--SmartThemeBlurTintColor));
+  --bgColor: color-mix(in srgb, white 3%, var(--primaryBgColRgb, var(--SmartThemeBlurTintColor)));
   --accentColor: rgb(from var(--SmartThemeQuoteColor) r g b / 1);
   flex: 1 1 auto;
   display: flex;
@@ -54,7 +54,7 @@ body.stem--nonDiscord #rm_extensions_block {
   align-items: center;
   gap: 0.5em;
   background-color: var(--bgColor);
-  border: 2px solid rgb(from var(--SmartThemeBorderColor) r g b / 0.5);
+  border: 2px solid rgb(from var(--SmartThemeBorderColor) r g b / 1);
   border-bottom-color: rgb(from var(--SmartThemeBorderColor) r g b / 1);
   border-radius: 6px 6px 0 0;
   color: rgb(from var(--SmartThemeBodyColor) r g b / 0.5);
@@ -112,7 +112,7 @@ body.stem--nonDiscord #rm_extensions_block {
 .stem--tabUi .stem--body {
   display: none;
   flex-direction: column;
-  background-color: rgb(var(--primaryBgCol, --SmartThemeBlurTintColor));
+  background-color: var(--bgColor);
   border: 2px solid rgb(from var(--SmartThemeBorderColor) r g b / 1);
   border-top: none;
   border-radius: 0 0 6px 6px;
@@ -141,6 +141,10 @@ body.stem--nonDiscord #rm_extensions_block {
 .stem--filterPanel .stem--filterGroup:has(.stem--search),
 .stem--filterPanel .stem--filterGroup .stem--search {
   flex: 1 1 auto;
+}
+.stem--filterPanel .stem--filterGroup:has(.stem--search) .text_pole,
+.stem--filterPanel .stem--filterGroup .stem--search .text_pole {
+  font-size: inherit;
 }
 .stem--filterPanel .stem--filterGroup .stem--filterGroupLabel {
   position: absolute;
@@ -217,7 +221,13 @@ body.stem--nonDiscord #rm_extensions_block {
   color: #f89406;
   opacity: 1;
 }
-.stem--table tr.stem--noRepo .stem--actions .stem--action.stem--update {
+.stem--table tr.stem--noRepo [data-property="Branch"] .stem--action.stem--branchButton,
+.stem--table tr.stem--isCore [data-property="Branch"] .stem--action.stem--branchButton {
+  opacity: 0;
+  pointer-events: none;
+}
+.stem--table tr.stem--noRepo .stem--actions .stem--action.stem--update,
+.stem--table tr.stem--isCore .stem--actions .stem--action.stem--update {
   color: #f89406;
   opacity: 0.5;
 }
@@ -235,7 +245,7 @@ body.stem--nonDiscord #rm_extensions_block {
 .stem--table th,
 .stem--table td {
   text-align: left;
-  padding: 0 1em;
+  padding: 0 1rem;
   width: 0;
 }
 .stem--table td {
@@ -248,6 +258,9 @@ body.stem--nonDiscord #rm_extensions_block {
 }
 .stem--table [data-property="Version"] {
   text-align: right;
+}
+.stem--table [data-property="Version"]:is(tbody *) {
+  font-family: var(--monoFontFamily);
 }
 .stem--table [data-property="Branch"] .stem--branchButton:not([data-count]),
 .stem--table [data-property="Branch"] .stem--branchButton[data-count="0"],
@@ -268,7 +281,7 @@ body.stem--nonDiscord #rm_extensions_block {
   display: flex;
   align-items: center;
   inset: 0;
-  padding: 0 1em;
+  padding: 0 1rem;
   position: absolute;
 }
 .stem--table [data-property="URL"] .stem--urlWrap a {
@@ -292,6 +305,7 @@ body.stem--nonDiscord #rm_extensions_block {
   align-items: center;
 }
 .stem--table .stem--actions .stem--action {
+  height: 2em;
   transition: 200ms;
 }
 .stem--table .stem--actions .stem--action.stem--toggle {
@@ -311,6 +325,105 @@ body.stem--nonDiscord #rm_extensions_block {
   opacity: 0;
   pointer-events: none;
   transition: 200ms;
+}
+.stem--tagPanel {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  flex-wrap: wrap;
+  padding: 0 0.5em 0.5em 0.5em;
+}
+.stem--tagPanel .stem--tag {
+  background: black;
+  border-radius: 0.5lh;
+  padding: 0 0.5lh;
+  font-size: small;
+  cursor: default;
+}
+.stem--list {
+  --tileSize: 250;
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--tileSize) * 1px), 1fr));
+  gap: 1em;
+  overflow: auto;
+}
+.stem--list .stem--item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background-color: color-mix(in srgb, #808080 30%, var(--SmartThemeBlurTintColor));
+  border-radius: 5px;
+  cursor: default;
+}
+.stem--list .stem--item[data-filter]:not([data-filter="[]"]) {
+  display: none;
+}
+.stem--list .stem--item.stem--isBusy {
+  pointer-events: none;
+  opacity: 0.75;
+  filter: grayscale(1);
+}
+.stem--list .stem--item.stem--isInstalled {
+  opacity: 0.5;
+}
+.stem--list .stem--item:hover > .stem--preview {
+  opacity: 1;
+  filter: saturate(1);
+}
+.stem--list .stem--item .stem--preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 3 / 1;
+  background-color: color-mix(in srgb, #808080 75%, var(--SmartThemeBlurTintColor));
+  background-size: cover;
+  background-position: center;
+  border-radius: 5px 5px 0 0;
+  container-type: inline-size;
+  filter: saturate(0.5);
+  opacity: 0.5;
+  transition: 200ms;
+}
+.stem--list .stem--item .stem--preview:before {
+  font-size: 30cqw;
+  opacity: 0.25;
+}
+.stem--list .stem--item .stem--name {
+  font-size: 1.25em;
+  padding: 0 0.25em;
+}
+.stem--list .stem--item .stem--author {
+  color: var(--SmartThemeEmColor);
+  font-size: smaller;
+  padding: 0 0.25em;
+}
+.stem--list .stem--item .stem--description {
+  flex: 1 1 auto;
+  margin: 5px 0;
+  font-size: small;
+  padding: 0 0.25em;
+}
+.stem--list .stem--item .stem--tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  padding: 0.25em;
+}
+.stem--list .stem--item .stem--tag {
+  background: black;
+  border-radius: 0.5lh;
+  padding: 0 0.5lh;
+  font-size: 0.75em;
+  cursor: default;
+}
+.stem--list .stem--item .stem--actions {
+  display: flex;
+  gap: 0.5em;
+  padding: 0 0.25em;
+}
+.stem--list .stem--item .stem--actions .stem--sep {
+  flex: 1 1 auto;
 }
 [data-stem--tab="config"] .stem--actions {
   display: flex;
@@ -361,6 +474,9 @@ body .popup .stem--readme {
 }
 .stem--gitLogPopup .stem--gitLogContent .stem--commit .stem--message {
   white-space: pre-wrap;
+}
+.popup:has(.stem--errorLogPopup) {
+  width: unset;
 }
 .stem--errorLogPopup {
   display: flex;

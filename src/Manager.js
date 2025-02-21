@@ -1,6 +1,7 @@
 import { EventEmitter } from '../../../../../lib/eventemitter.js';
 import { getRequestHeaders } from '../../../../../script.js';
 import { delay } from '../../../../utils.js';
+import { settings } from '../index.js';
 import { error } from '../lib/console.js';
 import { Extension } from './Extension.js';
 import { Plugin } from './Plugin.js';

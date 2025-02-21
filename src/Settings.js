@@ -2,6 +2,7 @@ import { saveSettingsDebounced } from '../../../../../script.js';
 import { extension_settings } from '../../../../extensions.js';
 import { AssetRepository } from './AssetRepository.js';
 import { Extension } from './Extension.js';
+import { Plugin } from './Plugin.js';
 
 export class Settings {
     /**@type {AssetRepository[]} */ repoList = [];
@@ -19,6 +20,10 @@ export class Settings {
             this.repoList.push(new AssetRepository(
                 'Asset Repo Copy',
                 'https://raw.githubusercontent.com/LenAnderson/SillyTavern-Content/refs/heads/asset-catalog/index.json',
+            ));
+            this.repoList.push(new AssetRepository(
+                'Lenny Suite (underscore)',
+                'https://raw.githubusercontent.com/underscorex86/SillyTavern-LennySuite/main/index.json',
             ));
             const originalInput = /**@type {HTMLInputElement}*/(document.querySelector('#assets-json-url-field'));
             if (originalInput) {

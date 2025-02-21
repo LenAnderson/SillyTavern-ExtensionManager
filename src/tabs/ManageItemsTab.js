@@ -4,6 +4,7 @@ import { Plugin } from '../Plugin.js';
 import { Filter } from '../ui/filter/Filter.js';
 import { FilterGroup } from '../ui/filter/FilterGroup.js';
 import { Tab } from '../ui/Tab.js';
+import { ManageItemsItem } from './ManageItemsItem.js';
 
 export class ManageItemsTab extends Tab {
     /**@type {{[columnName:string]:string}} */
@@ -14,11 +15,16 @@ export class ManageItemsTab extends Tab {
 
 
     /**@type {string[]} */
-    columns = ['Name', 'Source', 'Version', 'Branch', 'Author', 'URL', 'Actions'];
+    columns = ['Name', 'Version', 'Branch', 'Author', 'URL', 'Actions'];
 
-    /**@type {Filter[]} */
-    filterList = [];
-    /**@type {ManageItemssItem[]} */
+    filterList = [
+        { group: 'Updates', list: [
+            { label: 'Has Update', tester: (filter, item)=>item.isUpToDate === false },
+            { label: 'Updated', tester: (filter, item)=>item.isUpToDate === true },
+            { label: 'Can\'t update', tester: (filter, item)=>item.isRepo === false || item.isCore },
+        ] },
+    ];
+    /**@type {ManageItemsItem[]} */
     itemList = [];
 
     content = {
@@ -84,26 +90,7 @@ export class ManageItemsTab extends Tab {
                 searchGroup.add(search);
                 filterPanel.append(searchGroup.render());
             }
-            const filters = [
-                { group: 'State', list: [
-                    { label: 'Enabled', tester: (filter, item)=>!item.isDisabled },
-                    { label: 'Disabled', tester: (filter, item)=>item.isDisabled },
-                ] },
-                { group: 'Updates', list: [
-                    { label: 'Has Update', tester: (filter, item)=>item.isUpToDate === false },
-                    { label: 'Updated', tester: (filter, item)=>item.isUpToDate === true },
-                    { label: 'Can\'t update', tester: (filter, item)=>item.isRepo === false || item.isCore },
-                ] },
-                { group: 'Errors', list: [
-                    { label: 'Errors', tester: (filter, item)=>item.errorList.length > 0 },
-                    { label: 'No Errors', tester: (filter, item)=>item.errorList.length == 0 },
-                ] },
-                { group: 'Source', list: [
-                    { label: 'Core', tester: (filter, item)=>item.isCore },
-                    { label: 'Third-party', tester: (filter, item)=>!item.isCore },
-                ] },
-            ];
-            for (const fg of filters) {
+            for (const fg of this.filterList) {
                 const group = new FilterGroup(fg.group);
                 for (const f of fg.list) {
                     const filter = new Filter(f.label, f);
@@ -126,7 +113,7 @@ export class ManageItemsTab extends Tab {
                         const th = document.createElement('th'); {
                             th.dataset.property = col;
                             if (!['Source', 'Actions'].includes(col)) {
-                                th.textContent = col;
+                                th.textContent = this.columnMap[col] ?? col;
                             }
                             thead.append(th);
                         }
