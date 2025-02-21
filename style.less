@@ -428,6 +428,8 @@ body.stem--nonDiscord #rm_extensions_block {
         background-color: color-mix(in srgb, rgb(128 128 128) 30%, var(--SmartThemeBlurTintColor));
         border-radius: 5px;
         cursor: default;
+        overflow: hidden;
+        position: relative;
         &[data-filter]:not([data-filter="[]"]) {
             display: none;
         }
@@ -438,6 +440,16 @@ body.stem--nonDiscord #rm_extensions_block {
         }
         &.stem--isInstalled {
             opacity: 0.5;
+            &::after {
+                content: "INSTALLED";
+                position: absolute;
+                top: 20px;
+                right: -50px;
+                background: var(--accentColor);
+                color: white;
+                padding: 10px 50px;
+                transform: rotate(45deg);
+            }
         }
         &:hover {
             > .stem--preview {

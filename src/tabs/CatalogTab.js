@@ -7,16 +7,27 @@ import { CatalogItem } from './CatalogItem.js';
 export class CatalogTab extends Tab {
     id = 'catalog';
     icon = 'book-open';
-    label = 'Catalog';
-    title = 'Install extensions and plugins from catalog';
+    label = 'Catalogue';
+    title = 'Install extensions and plugins from catalogue';
 
+    /**
+     * @type {{
+            group: string;
+            list: {
+                label: string,
+                defaultValue?: any,
+                tester: (filter: any, item: Asset) => boolean,
+                filter?: Filter,
+            }[];
+        }[]}
+     */
     filterList = [
         { group: 'Type', list: [
             { label: 'Extension', tester: (filter, /**@type {Asset}*/item)=>item.type === 'extension' },
             { label: 'Plugin', tester: (filter, /**@type {Asset}*/item)=>item.type === 'plugin' },
         ] },
         { group: 'Status', list: [
-            { label: 'Installed', tester: (filter, /**@type {Asset}*/item)=>!!item.item },
+            { label: 'Installed', defaultValue:false, tester: (filter, /**@type {Asset}*/item)=>!!item.item },
             { label: 'Not Installed', tester: (filter, /**@type {Asset}*/item)=>!item.item },
         ] },
     ];
@@ -79,6 +90,7 @@ export class CatalogTab extends Tab {
                 const group = new FilterGroup(fg.group);
                 for (const f of fg.list) {
                     const filter = new Filter(f.label, f);
+                    f.filter = filter;
                     filter.eventSource.on(Filter.EVENT.INPUT, ()=>this.applyFilter(filter));
                     group.add(filter);
                 }
@@ -126,6 +138,11 @@ export class CatalogTab extends Tab {
         }
         for (const [idx, ext] of Object.entries(list)) {
             this.renderAsset(ext, parseInt(idx));
+        }
+        for (const fg of this.filterList) {
+            for (const f of fg.list) {
+                this.applyFilter(f.filter);
+            }
         }
     }
 

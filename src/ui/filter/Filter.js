@@ -13,6 +13,7 @@ export class Filter {
     /**@type {string} */ label;
     /**@type {string} */ title;
     /**@type {'checkbox'|'search'} */ type;
+    /**@type {any} */ defaultValue;
     /**@type {(filter:Filter, itemToTest:any)=>boolean} */ tester;
 
     /**@type {EventEmitter} */ eventSource;
@@ -42,13 +43,15 @@ export class Filter {
      * @param {string} options.label
      * @param {string} [options.title]
      * @param {'checkbox'|'search'} [options.type]
+     * @param {any} [options.defaultValue]
      * @param {(filter:Filter, itemToTest:any)=>boolean} options.tester
      */
-    constructor(id, { label, title = null, type = 'checkbox', tester }) {
+    constructor(id, { label, title = null, type = 'checkbox', defaultValue = true, tester }) {
         this.id = id;
         this.label = label;
         this.title = title ?? label;
         this.type = type;
+        this.defaultValue = defaultValue ?? true;
         this.tester = tester;
 
         this.eventSource = new EventEmitter();
@@ -81,7 +84,7 @@ export class Filter {
                     root.classList.add('stem--checkbox');
                     inp = document.createElement('input'); {
                         inp.type = 'checkbox';
-                        inp.checked = true;
+                        inp.checked = this.defaultValue;
                         lbl.insertAdjacentElement('beforebegin', inp);
                     }
                     break;
@@ -92,6 +95,7 @@ export class Filter {
                         inp.classList.add('text_pole');
                         inp.type = 'search';
                         inp.placeholder = this.title;
+                        inp.value = this.defaultValue || '';
                         root.append(inp);
                     }
                     break;

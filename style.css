@@ -355,6 +355,8 @@ body.stem--nonDiscord #rm_extensions_block {
   background-color: color-mix(in srgb, #808080 30%, var(--SmartThemeBlurTintColor));
   border-radius: 5px;
   cursor: default;
+  overflow: hidden;
+  position: relative;
 }
 .stem--list .stem--item[data-filter]:not([data-filter="[]"]) {
   display: none;
@@ -366,6 +368,16 @@ body.stem--nonDiscord #rm_extensions_block {
 }
 .stem--list .stem--item.stem--isInstalled {
   opacity: 0.5;
+}
+.stem--list .stem--item.stem--isInstalled::after {
+  content: "INSTALLED";
+  position: absolute;
+  top: 20px;
+  right: -50px;
+  background: var(--accentColor);
+  color: white;
+  padding: 10px 50px;
+  transform: rotate(45deg);
 }
 .stem--list .stem--item:hover > .stem--preview {
   opacity: 1;
