@@ -95,7 +95,6 @@ export class Filter {
                         inp.classList.add('text_pole');
                         inp.type = 'search';
                         inp.placeholder = this.title;
-                        inp.value = this.defaultValue || '';
                         root.append(inp);
                     }
                     break;
