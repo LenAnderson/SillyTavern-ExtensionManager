@@ -1,0 +1,195 @@
+#stem--settings-v2[data-user-settings="user-settings-v2-block"] {
+    /* max-height: calc(100dvh - var(--topBarBlockSize)); */
+    /* max-height: 100dvh; */
+    overflow: hidden;
+    container-type: inline-size;
+	display: block;
+	z-index: 10000 !important;
+	height: unset;
+    /* max-width: calc(100vw - (100vw - var(--sheldWidth)) / 2 - var(--nav-bar-width, 0)); */
+    bottom: 0;
+    > .wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+        .headerWrapper {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            .head {
+                font-size: 1.5em;
+            }
+            .actions {
+                display: flex;
+                flex-direction: row;
+                gap: 1em;
+                .action {
+                    white-space: nowrap;
+                }
+            }
+        }
+        .searchWrapper {
+            flex: 0 0 auto;
+            display: flex;
+            #user-settings-v2-search {
+                flex: 1 1 auto;
+            }
+        }
+        .settingsWrapper {
+            flex: 1 1 auto;
+            display: flex;
+            overflow: hidden;
+            gap: 1em;
+            position: relative;
+            .categoriesWrapper {
+                flex: 0 0 auto;
+                overflow: auto;
+                .category .category {
+                    margin-left: 1em;
+                }
+                .head {
+                    cursor: pointer;
+                    opacity: 0.5;
+                    transition: 200ms;
+                    &:hover {
+                        opacity: 0.75;
+                    }
+                    &.current {
+                        opacity: 1;
+                    }
+                    &.hidden {
+                        display: none;
+                    }
+                }
+            }
+            .contentWrapper {
+                flex: 1 1 auto;
+                overflow: auto;
+                height: 100%;
+                .category {
+                    display: none;
+                    &:has(.item:not(.hidden)) {
+                        display: block;
+                    }
+                    > .head {
+                        --baseSize: 1.5;
+                        padding: 10px;
+                        &[data-level="0"] {
+                            --level: 0;
+                            --size: calc(var(--baseSize) - var(--level) * 0.25);
+                            font-size: max(1em, calc(1em * var(--size)));
+                            top: calc(var(--level) * 1lh + (var(--level) * (20px - 0px)));
+                            line-height: calc(1em / var(--size));
+                            z-index: calc(10 - var(--level));
+                            ~ .item > .head {
+                                --level: 0;
+                                top: calc(var(--level) * 1lh + 1lh + ((var(--level) + 1) * (20px - 0px)));
+                            }
+                        }
+                        &[data-level="1"] {
+                            --level: 1;
+                            --size: calc(var(--baseSize) - var(--level) * 0.25);
+                            font-size: max(1em, calc(1em * var(--size)));
+                            top: calc(var(--level) * 1lh + (var(--level) * (20px - 0px)));
+                            line-height: calc(1em / var(--size));
+                            z-index: calc(10 - var(--level));
+                            ~ .item > .head {
+                                --level: 1;
+                                top: calc(var(--level) * 1lh + 1lh + ((var(--level) + 1) * (20px - 0px)));
+                            }
+                        }
+                        &[data-level="2"] {
+                            --level: 2;
+                            --size: calc(var(--baseSize) - var(--level) * 0.25);
+                            font-size: max(1em, calc(1em * var(--size)));
+                            top: calc(var(--level) * 1lh + (var(--level) * (20px - 0px)));
+                            line-height: calc(1em / var(--size));
+                            z-index: calc(10 - var(--level));
+                            ~ .item > .head {
+                                --level: 2;
+                                top: calc(var(--level) * 1lh + 1lh + ((var(--level) + 1) * (20px - 0px)));
+                            }
+                        }
+                        &[data-level="3"] {
+                            --level: 3;
+                            --size: calc(var(--baseSize) - var(--level) * 0.25);
+                            font-size: max(1em, calc(1em * var(--size)));
+                            top: calc(var(--level) * 1lh + (var(--level) * (20px - 0px)));
+                            line-height: calc(1em / var(--size));
+                            z-index: calc(10 - var(--level));
+                            ~ .item > .head {
+                                --level: 3;
+                                top: calc(var(--level) * 1lh + 1lh + ((var(--level) + 1) * (20px - 0px)));
+                            }
+                        }
+                        font-weight: bold;
+                        position: sticky;
+                        top: 0;
+                        line-height: 1;
+                        background-color: var(--SmartThemeBlurTintColor);
+                    }
+                }
+                .item {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5em;
+                    padding: 1.5em;
+                    &:hover {
+                        background-color:hsl(from var(--SmartThemeBlurTintColor) h s calc(l * 1.25));
+                    }
+                    &.hidden {
+                        display: none;
+                    }
+                    .head {
+                        /* position: sticky; */
+                        display: flex;
+                        gap: 1em;
+                        align-items: baseline;
+                        .text {
+                            flex: 0 0 auto;
+                            font-weight: bold;
+                            color: white;
+                        }
+                        small {
+                            flex: 1 1 auto;
+                        }
+                        .icons {
+                            flex: 0 0 auto;
+                            display: flex;
+                            gap: 0.25em;
+                            transition: 200ms;
+                            &:hover {
+                                color: white;
+                            }
+                        }
+                    }
+                    .description {
+                        opacity: 0.75;
+                    }
+                    .checkboxLabel {
+                        display: flex;
+                        gap: 1em;
+                        align-items: baseline;
+                        cursor: pointer;
+                    }
+                    .colorLabel {
+                        display: flex;
+                        gap: 1em;
+                        align-items: center;
+                        cursor: pointer;
+                    }
+                    .neo-range-wrap {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .actions {
+                        display: flex;
+                        gap: 0.5em;
+                        /* justify-content: flex-end; */
+                    }
+                }
+            }
+        }
+    }
+}

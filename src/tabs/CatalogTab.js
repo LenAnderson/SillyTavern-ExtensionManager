@@ -1,4 +1,6 @@
+import { settings } from '../../index.js';
 import { Asset } from '../Asset.js';
+import { Settings } from '../Settings.js';
 import { Filter } from '../ui/filter/Filter.js';
 import { FilterGroup } from '../ui/filter/FilterGroup.js';
 import { Tab } from '../ui/Tab.js';
@@ -12,14 +14,14 @@ export class CatalogTab extends Tab {
 
     /**
      * @type {{
-            group: string;
-            list: {
-                label: string,
-                defaultValue?: any,
-                tester: (filter: any, item: Asset) => boolean,
-                filter?: Filter,
-            }[];
-        }[]}
+     *      group: string;
+     *      list: {
+     *          label: string,
+     *          defaultValue?: any,
+     *          tester: (filter: any, item: Asset) => boolean,
+     *          filter?: Filter,
+     *      }[];
+     *  }[]}
      */
     filterList = [
         { group: 'Type', list: [
@@ -40,6 +42,12 @@ export class CatalogTab extends Tab {
         /**@type {HTMLElement} */
         list: undefined,
     };
+
+
+    constructor() {
+        super();
+        settings.eventSource.on(Settings.EVENT.REPO_LIST, ()=>this.populate(true));
+    }
 
 
     /**
@@ -119,8 +127,11 @@ export class CatalogTab extends Tab {
         return frag;
     }
 
-    async populate() {
-        const list = await Asset.list();
+    async populate(forceFetch = false) {
+        this.content.list.classList.add('stem--isLoading');
+        this.content.list.innerHTML = 'loading...';
+        this.content.tagPanel.innerHTML = '';
+        const list = await Asset.list(forceFetch);
         this.content.list.classList.remove('stem--isLoading');
         this.content.list.innerHTML = '';
         const tags = list

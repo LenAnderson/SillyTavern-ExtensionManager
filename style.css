@@ -1,3 +1,4 @@
+@import "UserSettings.style.css";
 body.stem--nonDiscord #rm_extensions_block {
   width: 100vw;
   height: calc(100dvh - var(--topBarBlockSize));
@@ -159,7 +160,7 @@ body.stem--nonDiscord #rm_extensions_block {
   align-items: baseline;
   font-size: small;
 }
-.stem--tabUi .stem--body:has(.stem--tableWrap) {
+.stem--tabUi .stem--body:has(.stem--tableWrap, .stem--listWrap) {
   overflow: hidden;
 }
 .stem--tableWrap {
@@ -340,6 +341,10 @@ body.stem--nonDiscord #rm_extensions_block {
   font-size: small;
   cursor: default;
 }
+.stem--listWrap {
+  flex: 1 1 auto;
+  overflow: auto;
+}
 .stem--list {
   --tileSize: 250;
   flex: 1 1 auto;
@@ -437,13 +442,54 @@ body.stem--nonDiscord #rm_extensions_block {
 .stem--list .stem--item .stem--actions .stem--sep {
   flex: 1 1 auto;
 }
-[data-stem--tab="config"] .stem--actions {
+[data-stem--tab="config"] {
+  padding-left: 0.5em;
+}
+[data-stem--tab="config"] .stem--repo {
+  display: flex;
+  gap: 1em;
+  align-items: end;
+  border-top: 1px solid var(--SmartThemeBorderColor);
+  margin-top: 1em;
+  padding-top: 1em;
+}
+[data-stem--tab="config"] .stem--repo:has(+ .stem--addRepo) {
+  border-bottom: 1px solid var(--SmartThemeBorderColor);
+  margin-bottom: 1em;
+  padding-bottom: 1em;
+}
+[data-stem--tab="config"] .stem--repo .stem--dragger {
+  cursor: grab;
+  padding: 0.5em;
+  opacity: 0.5;
+  transition: 200ms;
+  width: 2em;
+}
+[data-stem--tab="config"] .stem--repo .stem--dragger:hover {
+  opacity: 1;
+}
+[data-stem--tab="config"] .stem--repo .stem--input {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+[data-stem--tab="config"] .stem--repo .stem--input[data-input="title"] {
+  flex: 0 0 15em;
+}
+[data-stem--tab="config"] .stem--repo .stem--input[data-input="url"] {
+  flex: 1 1 auto;
+}
+[data-stem--tab="config"] .stem--repo .stem--label {
+  font-size: smaller;
+  opacity: 0.75;
+}
+[data-stem--tab="config"] .stem--repo .stem--actions {
   display: flex;
   gap: 1em;
   justify-content: flex-end;
 }
-[data-stem--tab="config"] textarea {
-  flex: 1 1 auto;
+[data-stem--tab="config"] .stem--repo .stem--actions .stem--action {
+  margin: 0;
 }
 .popup:has(.stem--readme) {
   height: auto !important;

@@ -1,3 +1,7 @@
+@import "./UserSettings.style.css";
+
+
+
 body.stem--nonDiscord #rm_extensions_block {
 	width: 100vw;
 	height: calc(100dvh - var(--topBarBlockSize));
@@ -198,7 +202,7 @@ body.stem--nonDiscord #rm_extensions_block {
 
 
 
-.stem--tabUi .stem--body:has(.stem--tableWrap) {
+.stem--tabUi .stem--body:has(.stem--tableWrap, .stem--listWrap) {
     overflow: hidden;
 }
 .stem--tableWrap {
@@ -409,6 +413,10 @@ body.stem--nonDiscord #rm_extensions_block {
         cursor: default;
     }
 }
+.stem--listWrap {
+    flex: 1 1 auto;
+    overflow: auto;
+}
 .stem--list {
     --tileSize: 250;
 
@@ -522,13 +530,61 @@ body.stem--nonDiscord #rm_extensions_block {
 
 
 [data-stem--tab="config"] {
-    .stem--actions {
+    padding-left: 0.5em;
+
+    .stem--repo {
         display: flex;
         gap: 1em;
-        justify-content: flex-end;
-    }
-    textarea {
-        flex: 1 1 auto;
+        align-items: end;
+
+        border-top: 1px solid var(--SmartThemeBorderColor);
+        &:has(+ .stem--addRepo) {
+            border-bottom: 1px solid var(--SmartThemeBorderColor);
+            margin-bottom: 1em;
+            padding-bottom: 1em;
+        }
+        margin-top: 1em;
+        padding-top: 1em;
+
+        .stem--dragger {
+            cursor: grab;
+            padding: 0.5em;
+            opacity: 0.5;
+            transition: 200ms;
+            width: 2em;
+            &:hover {
+                opacity: 1;
+            }
+        }
+
+        .stem--input {
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+
+            &[data-input="title"] {
+                flex: 0 0 15em;
+            }
+
+            &[data-input="url"] {
+                flex: 1 1 auto;
+            }
+        }
+
+        .stem--label {
+            font-size: smaller;
+            opacity: 0.75;
+        }
+
+        .stem--actions {
+            display: flex;
+            gap: 1em;
+            justify-content: flex-end;
+
+            .stem--action {
+                margin: 0;
+            }
+        }
     }
 }
 

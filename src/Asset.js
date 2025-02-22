@@ -1,6 +1,6 @@
 import { EventEmitter } from '../../../../../lib/eventemitter.js';
 import { settings } from '../index.js';
-import { log } from '../lib/console.js';
+import { error, log } from '../lib/console.js';
 import { Extension } from './Extension.js';
 import { Manager } from './Manager.js';
 import { Plugin } from './Plugin.js';
@@ -34,25 +34,32 @@ export class Asset {
         return instance;
     }
 
-    static async list() {
-        log('Asset.list()');
+    static async list(forceFetch = false) {
+        log('Asset.list()', { forceFetch });
         while (this.cachePromise) {
             log('Asset.list()', 'waiting...');
-            await this.cachePromise();
+            await this.cachePromise;
         }
-        if (this.cache.length == 0) {
+        if (forceFetch || this.cache.length == 0) {
             log('Asset.list()', 'fetching...');
+            while (this.cache.pop());
             const { promise, resolve } = Promise.withResolvers();
             this.cachePromise = promise;
             let items = [];
             for (const repo of settings.repoList) {
-                const response = await fetch(repo.url);
-                if (!response.ok) {
+                if (!repo.url?.length) continue;
+                try {
+                    const response = await fetch(repo.url);
+                    if (!response.ok) {
+                        toastr.warning(`Failed to fetch list of assets from ${repo.url}`, 'Extension Manager');
+                        continue;
+                    }
+                    const data = await response.json();
+                    items.push(...data.filter(it=>['extension', 'plugin'].includes(it.type)));
+                } catch (ex) {
+                    error(ex);
                     toastr.warning(`Failed to fetch list of assets from ${repo.url}`, 'Extension Manager');
-                    continue;
                 }
-                const data = await response.json();
-                items.push(...data.filter(it=>['extension', 'plugin'].includes(it.type)));
             }
             items = items.filter((a,idx,list)=>idx == list.findIndex(b=>b.url.toLowerCase().replace(/\.git$/, '') == a.url.toLowerCase().replace(/\.git$/, '')));
             for (const item of items) {
