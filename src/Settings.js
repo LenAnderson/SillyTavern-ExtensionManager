@@ -17,6 +17,8 @@ export class Settings {
 
     /**@type {AssetRepository[]} */ repoList = [];
     /**@type {number} */ updateCheckHours = 24;
+    /**@type {number} */ tileSize = 250;
+
     /**@type {Extension[]} */ extensionList = [];
     /**@type {Plugin[]} */ pluginList = [];
 
@@ -38,6 +40,8 @@ export class Settings {
         return {
             repoList: this.repoList,
             updateCheckHours: this.updateCheckHours,
+            tileSize: this.tileSize,
+
             extensionCache: this.extensionList.filter(it=>!it.isCore),
             pluginCache: this.pluginList,
         };

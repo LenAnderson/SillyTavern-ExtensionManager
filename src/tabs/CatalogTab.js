@@ -104,6 +104,45 @@ export class CatalogTab extends Tab {
                 }
                 filterPanel.append(group.render());
             }
+            const actions = document.createElement('div'); {
+                actions.classList.add('stem--actions');
+                const size = document.createElement('div'); {
+                    size.classList.add('stem--sizeInput');
+                    size.title = 'Tile size';
+                    const small = document.createElement('div'); {
+                        small.classList.add('stem--label');
+                        small.classList.add('fa-solid', 'fa-fw', 'fa-table-cells');
+                        size.append(small);
+                    }
+                    const inp = document.createElement('input'); {
+                        inp.type = 'range';
+                        inp.min = '120';
+                        inp.max = '600';
+                        inp.value = settings.tileSize.toString();
+                        inp.addEventListener('input', ()=>{
+                            this.content.list.style.setProperty('--tileSize', inp.value);
+                            settings.tileSize = parseInt(inp.value);
+                            settings.save();
+                        });
+                        size.append(inp);
+                    }
+                    const large = document.createElement('div'); {
+                        large.classList.add('stem--label');
+                        large.classList.add('fa-solid', 'fa-fw', 'fa-table-cells-large');
+                        size.append(large);
+                    }
+                    actions.append(size);
+                }
+                const refresh = document.createElement('div'); {
+                    refresh.classList.add('stem--action');
+                    refresh.classList.add('menu_button');
+                    refresh.classList.add('fa-solid', 'fa-fw', 'fa-rotate');
+                    refresh.title = 'Refresh catalogue';
+                    refresh.addEventListener('click', ()=>this.populate());
+                    actions.append(refresh);
+                }
+                filterPanel.append(actions);
+            }
             frag.append(filterPanel);
         }
         const tagPanel = document.createElement('div'); {
@@ -117,12 +156,12 @@ export class CatalogTab extends Tab {
                 this.content.list = list;
                 list.classList.add('stem--list');
                 list.classList.add('stem--isLoading');
+                list.style.setProperty('--tileSize', settings.tileSize.toString());
                 list.append('loading...');
                 listWrap.append(list);
             }
             frag.append(listWrap);
         }
-        //TODO size input?
         this.populate();
         return frag;
     }

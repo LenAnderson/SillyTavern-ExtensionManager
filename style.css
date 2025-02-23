@@ -160,6 +160,17 @@ body.stem--nonDiscord #rm_extensions_block {
   align-items: baseline;
   font-size: small;
 }
+.stem--filterPanel .stem--actions {
+  display: flex;
+  gap: 1em;
+  align-items: center;
+  margin-left: 1em;
+}
+.stem--filterPanel .stem--actions .stem--sizeInput {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
 .stem--tabUi .stem--body:has(.stem--tableWrap, .stem--listWrap) {
   overflow: hidden;
 }
