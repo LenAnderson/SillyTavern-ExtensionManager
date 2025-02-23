@@ -54,10 +54,35 @@ export class CatalogItem {
                 }
                 item.append(img);
             }
-            const name = document.createElement('div'); {
-                name.classList.add('stem--name');
-                name.textContent = this.model.name;
-                item.append(name);
+            const title = document.createElement('div'); {
+                title.classList.add('stem--title');
+                const name = document.createElement('div'); {
+                    name.classList.add('stem--name');
+                    name.textContent = this.model.name;
+                    title.append(name);
+                }
+                const type = document.createElement('div'); {
+                    type.classList.add('stem--type');
+                    type.classList.add('fa-solid', 'fa-fw');
+                    switch (this.model.type) {
+                        case 'extension': {
+                            type.classList.add('fa-cubes');
+                            type.title = 'UI Extension';
+                            break;
+                        }
+                        case 'plugin': {
+                            type.classList.add('fa-puzzle-piece');
+                            type.title = 'Server Plugin';
+                            break;
+                        }
+                        default: {
+                            type.classList.add('fa-question');
+                            break;
+                        }
+                    }
+                    title.append(type);
+                }
+                item.append(title);
             }
             const author = document.createElement('div'); {
                 author.classList.add('stem--author');

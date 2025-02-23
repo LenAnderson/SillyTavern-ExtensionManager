@@ -497,9 +497,21 @@ body.stem--nonDiscord #rm_extensions_block {
                 opacity: 0.25;
             }
         }
-        .stem--name {
+        .stem--title {
+            display: flex;
+            flex-direction: row;
+            gap: 0.5em;
+            align-items: start;
             font-size: 1.25em;
+        }
+        .stem--name {
+            flex: 1 1 auto;
             padding: 0 0.25em;
+        }
+        .stem--type {
+            flex: 0 0 auto;
+            margin: 0.25em;
+            opacity: 0.5;
         }
         .stem--author {
             color: var(--SmartThemeEmColor);
