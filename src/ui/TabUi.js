@@ -1,3 +1,5 @@
+import { settings } from '../../index.js';
+import { Settings } from '../Settings.js';
 import { Tab } from './Tab.js';
 import { TabAction } from './TabAction.js';
 
@@ -76,6 +78,10 @@ export class TabUi {
             const root = document.createElement('div'); {
                 this.dom.root = root;
                 root.classList.add('stem--tabUi');
+                root.style.setProperty('--accentColor', settings.currentAccentColor);
+                settings.eventSource.on(Settings.EVENT.ACCENT_COLOR, ()=>{
+                    root.style.setProperty('--accentColor', settings.currentAccentColor);
+                });
                 const tabRow = document.createElement('div'); {
                     tabRow.classList.add('stem--tabRow');
                     const primary = document.createElement('div'); {

@@ -12,12 +12,31 @@ export class Settings {
     static EVENT = {
         /** asset repository list was changed */
         REPO_LIST: 'repo_list',
+        /** accent color was changed */
+        ACCENT_COLOR: 'accent_color',
     };
 
 
     /**@type {AssetRepository[]} */ repoList = [];
     /**@type {number} */ updateCheckHours = 24;
     /**@type {number} */ tileSize = 250;
+    /**@type {boolean} */ #useCustomAccentColor = false;
+    get useCustomAccentColor() { return this.#useCustomAccentColor; }
+    set useCustomAccentColor(value) {
+        if (this.#useCustomAccentColor != value) {
+            this.#useCustomAccentColor = value;
+            this.eventSource?.emit(Settings.EVENT.ACCENT_COLOR);
+        }
+    }
+    /**@type {string} */ #customAccentColor = 'rgb(0 255 0 / 1)';
+    get customAccentColor() { return this.#customAccentColor; }
+    set customAccentColor(value) {
+        if (this.#customAccentColor != value) {
+            this.#customAccentColor = value;
+            this.eventSource?.emit(Settings.EVENT.ACCENT_COLOR);
+        }
+    }
+    get currentAccentColor() { return this.useCustomAccentColor ? this.customAccentColor : 'var(--SmartThemeQuoteColor)'; }
 
     /**@type {Extension[]} */ extensionList = [];
     /**@type {Plugin[]} */ pluginList = [];
@@ -41,6 +60,8 @@ export class Settings {
             repoList: this.repoList,
             updateCheckHours: this.updateCheckHours,
             tileSize: this.tileSize,
+            useCustomAccentColor: this.useCustomAccentColor,
+            customAccentColor: this.customAccentColor,
 
             extensionCache: this.extensionList.filter(it=>!it.isCore),
             pluginCache: this.pluginList,

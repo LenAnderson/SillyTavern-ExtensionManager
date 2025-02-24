@@ -4,6 +4,8 @@ import { settings } from '../../index.js';
 import { error } from '../../lib/console.js';
 import { AssetRepository } from '../AssetRepository.js';
 import { BaseSetting } from '../settings/BaseSetting.js';
+import { CheckboxSetting } from '../settings/CheckboxSetting.js';
+import { ColorSetting } from '../settings/ColorSetting.js';
 import { CustomSetting } from '../settings/CustomSetting.js';
 import { NumberSetting } from '../settings/NumberSetting.js';
 import { Tab } from '../ui/Tab.js';
@@ -102,6 +104,38 @@ export class ConfigTab extends Tab {
                     settings.save();
                 },
             }));
+        }
+        { // colors
+            { // use custom accent
+                this.settingList.push(CheckboxSetting.fromProps({ id: 'stem--useCustomAccentColor',
+                    name: 'Use Custom Accent Colour',
+                    description: `
+                        Use the custom accent colour. If disabled, uses the theme's quote colour:
+                        <span class="stem--defaultAccentColor"></span>
+                    `,
+                    category: ['Colours'],
+                    initialValue: settings.useCustomAccentColor,
+                    onChange: (it)=>{
+                        settings.useCustomAccentColor = it.value;
+                        settings.save();
+                    },
+                }));
+            }
+            { // custom accent color
+                this.settingList.push(ColorSetting.fromProps({ id: 'stem--customAccentColor',
+                    name: 'Custom Accent Colour',
+                    description: `
+                        Custom accent colour to be used for things like highlighting the currently selected
+                        tab, installed extensions in the catalogue and more.
+                    `,
+                    category: ['Colours'],
+                    initialValue: settings.customAccentColor,
+                    onChange: (it)=>{
+                        settings.customAccentColor = it.value;
+                        settings.save();
+                    },
+                }));
+            }
         }
     }
 

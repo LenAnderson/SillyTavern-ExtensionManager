@@ -514,6 +514,17 @@ body.stem--nonDiscord #rm_extensions_block {
 [data-stem--tab="config"] .stem--repo .stem--actions .stem--action {
   margin: 0;
 }
+[data-stem--tab="config"] .stem--defaultAccentColor {
+  display: inline-block;
+  width: 2.5rem;
+  height: 1rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #626262;
+  background: var(--SmartThemeQuoteColor);
+  box-sizing: border-box;
+  margin-left: 1rem;
+}
 .popup:has(.stem--readme) {
   height: auto !important;
 }
