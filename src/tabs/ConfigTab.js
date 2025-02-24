@@ -31,6 +31,11 @@ export class ConfigTab extends Tab {
         this.registerSettings();
     }
 
+    select() {
+        super.select();
+        this.updateCategory();
+    }
+
 
     registerSettings() {
         while (this.settingList.pop());
