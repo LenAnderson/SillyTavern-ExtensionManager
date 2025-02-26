@@ -14,12 +14,16 @@ export class Settings {
         REPO_LIST: 'repo_list',
         /** accent color was changed */
         ACCENT_COLOR: 'accent_color',
+        /** core icon color was changed */
+        CORE_ICON_COLOR: 'core_color',
     };
 
 
     /**@type {AssetRepository[]} */ repoList = [];
     /**@type {number} */ updateCheckHours = 24;
+    /**@type {boolean} */ updateNotify = true;
     /**@type {number} */ tileSize = 250;
+
     /**@type {boolean} */ #useCustomAccentColor = false;
     get useCustomAccentColor() { return this.#useCustomAccentColor; }
     set useCustomAccentColor(value) {
@@ -37,6 +41,15 @@ export class Settings {
         }
     }
     get currentAccentColor() { return this.useCustomAccentColor ? this.customAccentColor : 'var(--SmartThemeQuoteColor)'; }
+
+    /**@type {boolean} */ #monochromeCoreIcon = true;
+    get monochromeCoreIcon() { return this.#monochromeCoreIcon; }
+    set monochromeCoreIcon(value) {
+        if (this.#monochromeCoreIcon != value) {
+            this.#monochromeCoreIcon = value;
+            this.eventSource?.emit(Settings.EVENT.CORE_ICON_COLOR);
+        }
+    }
 
     /**@type {Extension[]} */ extensionList = [];
     /**@type {Plugin[]} */ pluginList = [];
@@ -62,6 +75,7 @@ export class Settings {
             tileSize: this.tileSize,
             useCustomAccentColor: this.useCustomAccentColor,
             customAccentColor: this.customAccentColor,
+            monochromeCoreIcon: this.monochromeCoreIcon,
 
             extensionCache: this.extensionList.filter(it=>!it.isCore),
             pluginCache: this.pluginList,

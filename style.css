@@ -302,6 +302,9 @@ body.stem--nonDiscord #rm_extensions_block {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.stem--table .stem--source.stem--core:is(.stem--monochromeCoreIcon .stem--core) {
+  filter: saturate(0) invert(1) brightness(0.75);
+}
 .stem--table .stem--source.stem--core:after {
   content: '';
   aspect-ratio: 1 / 1;
@@ -610,4 +613,47 @@ body .popup .stem--readme {
 .stem--errorLogPopup .stem--errorContent .stem--error .stem--stack {
   padding: 0.5em;
   white-space: pre-wrap;
+}
+#toast-container > .toast-info.stem--updateNotice {
+  padding-bottom: 0;
+}
+#toast-container > .toast-info.stem--updateNotice .toast-message {
+  font-size: smaller;
+}
+#toast-container > .toast-info.stem--updateNotice .stem--root {
+  display: flex;
+  flex-direction: column;
+  max-height: 50vh;
+}
+#toast-container > .toast-info.stem--updateNotice .stem--wrap {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+#toast-container > .toast-info.stem--updateNotice ul {
+  margin: 0;
+  padding: 0 1.5em;
+}
+#toast-container > .toast-info.stem--updateNotice .stem--title {
+  font-weight: bold;
+}
+#toast-container > .toast-info.stem--updateNotice .stem--actions {
+  display: flex;
+  gap: 2px;
+  margin-left: -50px;
+  margin-right: -15px;
+  margin-top: 1em;
+}
+#toast-container > .toast-info.stem--updateNotice .stem--action {
+  flex: 1 1 50%;
+  background-color: rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  font-size: 1.25em;
+  font-weight: bold;
+  opacity: 0.5;
+  padding: 0.25em;
+  text-align: center;
+  transition: 200ms;
+}
+#toast-container > .toast-info.stem--updateNotice .stem--action:hover {
+  opacity: 1;
 }

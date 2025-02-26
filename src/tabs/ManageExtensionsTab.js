@@ -7,6 +7,7 @@ import { FilterGroup } from '../ui/filter/FilterGroup.js';
 import { Tab } from '../ui/Tab.js';
 import { ManageExtensionsItem } from './ManageExtensionsItem.js';
 import { ManageItemsTab } from './ManageItemsTab.js';
+import { STEM_ITEM_EVENT } from '../STEMItem.js';
 
 export class ManageExtensionsTab extends ManageItemsTab {
     id = 'manageExtensions';
@@ -44,15 +45,18 @@ export class ManageExtensionsTab extends ManageItemsTab {
         Manager.eventSource.on(Manager.EVENT.INSTALLED_EXTENSION, async(ext)=>{
             this.renderExtensionRow(ext, (await Extension.list()).indexOf(ext) + 1);
         });
+        Extension.eventSource.on(STEM_ITEM_EVENT.GIT_STATUS, async()=>{
+            this.updateUpdateButton();
+        });
     }
 
     async populateTable() {
         const list = await Extension.list();
         this.content.table.root.classList.remove('stem--isLoading');
-        const now = Date.now();
         for (const [idx, ext] of Object.entries(list)) {
             this.renderExtensionRow(ext, parseInt(idx));
         }
+        this.updateUpdateButton();
     }
 
     /**

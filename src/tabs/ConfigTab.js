@@ -1,4 +1,5 @@
-import { event_types, eventSource } from '../../../../../../script.js';
+import { event_types, eventSource, saveSettingsDebounced } from '../../../../../../script.js';
+import { extension_settings } from '../../../../../extensions.js';
 import { getSortableDelay } from '../../../../../utils.js';
 import { settings } from '../../index.js';
 import { error } from '../../lib/console.js';
@@ -91,19 +92,45 @@ export class ConfigTab extends Tab {
             }));
         }
         { // updates
-            this.settingList.push(NumberSetting.fromProps({ id: 'stem--updateCheckHours',
-                name: 'Update Check Interval',
-                description: 'Minimum hours between automatic update checks (on page load)',
-                category: ['Updates'],
-                initialValue: 72,
-                min: 0,
-                max: 7200,
-                step: 1,
-                onChange: (it)=>{
-                    settings.updateCheckHours = it.value;
-                    settings.save();
-                },
-            }));
+            { // update interval
+                this.settingList.push(NumberSetting.fromProps({ id: 'stem--updateCheckHours',
+                    name: 'Update Check Interval',
+                    description: 'Minimum hours between automatic update checks (on page load)',
+                    category: ['Updates'],
+                    initialValue: settings.updateCheckHours,
+                    min: 0,
+                    max: 7200,
+                    step: 1,
+                    onChange: (it)=>{
+                        settings.updateCheckHours = it.value;
+                        settings.save();
+                    },
+                }));
+            }
+            { // notify
+                this.settingList.push(CheckboxSetting.fromProps({ id: 'stem--updateNotify',
+                    name: 'Notify On Updates',
+                    description: 'Notify when extensions or plugins can be updated',
+                    category: ['Updates'],
+                    initialValue: settings.updateNotify,
+                    onChange: (it)=>{
+                        settings.updateNotify = it.value;
+                        settings.save();
+                    },
+                }));
+            }
+            { // disable core update checks
+                this.settingList.push(CheckboxSetting.fromProps({ id: 'stem--disableCoreUpdates',
+                    name: 'Disable Native Update Checks',
+                    description: 'Disable SillyTavern\'s built-in update checks and notifications',
+                    category: ['Updates'],
+                    initialValue: !extension_settings.notifyUpdates,
+                    onChange: (it)=>{
+                        extension_settings.notifyUpdates = !it.value;
+                        saveSettingsDebounced();
+                    },
+                }));
+            }
         }
         { // colors
             { // use custom accent
@@ -132,6 +159,20 @@ export class ConfigTab extends Tab {
                     initialValue: settings.customAccentColor,
                     onChange: (it)=>{
                         settings.customAccentColor = it.value;
+                        settings.save();
+                    },
+                }));
+            }
+            { // core icon monochrome
+                this.settingList.push(CheckboxSetting.fromProps({ id: 'stem--monochromeCoreIcon',
+                    name: 'Monochrome Core Icon',
+                    description: `
+                        Display the SillyTavern icon used to indicate core extensions monochrome.
+                    `,
+                    category: ['Colours'],
+                    initialValue: settings.monochromeCoreIcon,
+                    onChange: (it)=>{
+                        settings.monochromeCoreIcon = it.value;
                         settings.save();
                     },
                 }));

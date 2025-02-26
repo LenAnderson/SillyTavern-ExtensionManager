@@ -82,6 +82,10 @@ export class TabUi {
                 settings.eventSource.on(Settings.EVENT.ACCENT_COLOR, ()=>{
                     root.style.setProperty('--accentColor', settings.currentAccentColor);
                 });
+                root.classList[settings.monochromeCoreIcon ? 'add' : 'remove']('stem--monochromeCoreIcon');
+                settings.eventSource.on(Settings.EVENT.CORE_ICON_COLOR, ()=>{
+                    root.classList[settings.monochromeCoreIcon ? 'add' : 'remove']('stem--monochromeCoreIcon');
+                });
                 const tabRow = document.createElement('div'); {
                     tabRow.classList.add('stem--tabRow');
                     const primary = document.createElement('div'); {

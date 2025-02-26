@@ -1,6 +1,7 @@
 import { settings } from '../../index.js';
 import { Manager } from '../Manager.js';
 import { Plugin } from '../Plugin.js';
+import { STEM_ITEM_EVENT } from '../STEMItem.js';
 import { ManageItemsTab } from './ManageItemsTab.js';
 import { ManagePluginsItem } from './ManagePluginsItem.js';
 
@@ -23,6 +24,9 @@ export class ManagePluginsTab extends ManageItemsTab {
         Manager.eventSource.on(Manager.EVENT.INSTALLED_PLUGIN, async(ext)=>{
             // this.renderExtensionRow(ext, (await Extension.list()).indexOf(ext) + 1);
         });
+        Plugin.eventSource.on(STEM_ITEM_EVENT.GIT_STATUS, async()=>{
+            this.updateUpdateButton();
+        });
     }
 
     async populateTable() {
@@ -37,6 +41,7 @@ export class ManagePluginsTab extends ManageItemsTab {
                 item.checkForUpdate();
             }
         }
+        this.updateUpdateButton();
     }
 
     /**

@@ -1,5 +1,6 @@
 import { warn } from '../../lib/console.js';
 import { Extension } from '../Extension.js';
+import { Manager } from '../Manager.js';
 import { Plugin } from '../Plugin.js';
 import { Filter } from '../ui/filter/Filter.js';
 import { FilterGroup } from '../ui/filter/FilterGroup.js';
@@ -24,10 +25,24 @@ export class ManageItemsTab extends Tab {
             { label: 'Can\'t update', tester: (filter, item)=>item.isRepo === false || item.isCore },
         ] },
     ];
-    /**@type {ManageItemsItem[]} */
+    /**@type {ManageItemsItem<import('../STEMItem.js').STEMItem>[]} */
     itemList = [];
 
     content = {
+        actions: {
+            update: {
+                /**@type {HTMLElement} */
+                button: undefined,
+                /**@type {HTMLElement} */
+                icon: undefined,
+            },
+            check: {
+                /**@type {HTMLElement} */
+                button: undefined,
+                /**@type {HTMLElement} */
+                icon: undefined,
+            },
+        },
         table: {
             /**@type {HTMLTableElement} */
             root: undefined,
@@ -99,6 +114,62 @@ export class ManageItemsTab extends Tab {
                 }
                 filterPanel.append(group.render());
             }
+            const actions = document.createElement('div'); {
+                actions.classList.add('stem--actions');
+                const updateAll = document.createElement('div'); {
+                    this.content.actions.update.button = updateAll;
+                    updateAll.classList.add('stem--action');
+                    updateAll.classList.add('menu_button');
+                    updateAll.classList.add('fa-fw');
+                    updateAll.title = `Update all ${this.itemsWord}`;
+                    updateAll.addEventListener('click', async()=>{
+                        const list = this.itemList.filter(it=>it.model.isRepo && !it.model.isUpToDate);
+                        if (list.length) {
+                            i.classList.remove('fa-download');
+                            i.classList.add('fa-spinner', 'fa-spin-pulse');
+                            for (const item of list) {
+                                await item.model.update();
+                            }
+                            i.classList.add('fa-download');
+                            i.classList.remove('fa-spinner', 'fa-spin-pulse');
+                        } else {
+                            toastr.info(`No ${this.itemWord} updates`, 'ExtensionManager');
+                        }
+                    });
+                    const i = document.createElement('i'); {
+                        this.content.actions.update.icon = i;
+                        i.classList.add('fa-solid', 'fa-fw', 'fa-download');
+                        updateAll.append(i);
+                    }
+                    actions.append(updateAll);
+                }
+                const checkAll = document.createElement('div'); {
+                    checkAll.classList.add('stem--action');
+                    checkAll.classList.add('menu_button');
+                    checkAll.classList.add('fa-fw');
+                    checkAll.title = `Check all ${this.itemsWord} for updates`;
+                    checkAll.addEventListener('click', async()=>{
+                        this.content.actions.check.button = checkAll;
+                        i.classList.remove('fa-rotate');
+                        i.classList.add('fa-spinner', 'fa-spin-pulse');
+                        Manager.firstUpdateCheck = true;
+                        const proms = [];
+                        for (const item of this.itemList) {
+                            proms.push(item.model.checkForUpdate());
+                        }
+                        await Promise.all(proms);
+                        i.classList.add('fa-rotate');
+                        i.classList.remove('fa-spinner', 'fa-spin-pulse');
+                    });
+                    const i = document.createElement('i'); {
+                        this.content.actions.check.icon = i;
+                        i.classList.add('fa-solid', 'fa-fw', 'fa-rotate');
+                        checkAll.append(i);
+                    }
+                    actions.append(checkAll);
+                }
+                filterPanel.append(actions);
+            }
             frag.append(filterPanel);
         }
         const tblWrap = document.createElement('div'); {
@@ -143,5 +214,16 @@ export class ManageItemsTab extends Tab {
 
     async populateTable() {
         warn('ManageItemsTab.populateTable() has not been implemented!');
+    }
+
+    updateUpdateButton() {
+        if (this.content.actions.update) {
+            const list = this.itemList.filter(it=>it.model.isRepo && !it.model.isUpToDate);
+            this.content.actions.update.button.title = [
+                `Update all ${this.itemsWord}`,
+                '---',
+                list.length == 0 ? 'no updates' : list.map(it=>`• ${it.model.displayName}`).join('\n'),
+            ].join('\n');
+        }
     }
 }

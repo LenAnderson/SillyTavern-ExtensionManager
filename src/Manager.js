@@ -5,6 +5,7 @@ import { settings } from '../index.js';
 import { error } from '../lib/console.js';
 import { Extension } from './Extension.js';
 import { Plugin } from './Plugin.js';
+import { UpdateToast } from './UpdateToast.js';
 
 export class Manager {
     /** @readonly */
@@ -21,6 +22,10 @@ export class Manager {
     static updateQueue = [];
     /**@type {boolean} */
     static isProcessingUpdateQueue = false;
+    /**@type {boolean} */
+    static firstUpdateCheck = true;
+    /**@type {UpdateToast} */
+    static updateNotice = new UpdateToast();
 
 
     static async install(repo) {
@@ -78,6 +83,10 @@ export class Manager {
     static async processUpdateQueue() {
         if (this.isProcessingUpdateQueue) return;
         this.isProcessingUpdateQueue = true;
+        const updates = {
+            extensionList: [],
+            pluginList: [],
+        };
         while (this.updateQueue.length) {
             await delay(200);
             const { item, resolve } = this.updateQueue.shift();
@@ -95,12 +104,19 @@ export class Manager {
                     continue;
                 }
                 const data = await response.json();
+                if (data.isRepo && !data.isUpToDate) {
+                    updates[`${item instanceof Extension ? 'extension' : 'plugin'}List`].push(item);
+                }
                 resolve(data);
             } catch {
                 resolve(null);
                 continue;
             }
         }
+        if (settings.updateNotify && this.firstUpdateCheck && updates.extensionList.length + updates.pluginList.length) {
+            this.updateNotice.show();
+        }
+        this.firstUpdateCheck = false;
         this.isProcessingUpdateQueue = false;
     }
 }
