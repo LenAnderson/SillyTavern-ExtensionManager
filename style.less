@@ -746,6 +746,9 @@ body .popup .stem--readme {
         flex: 1 1 auto;
         overflow: auto;
     }
+    .stem--extensions:not(:is(.stem--hasExtensions *)), .stem--plugins:not(:is(.stem--hasPlugins *)) {
+        display: none;
+    }
     ul {
         margin: 0;
         padding: 0 1.5em;

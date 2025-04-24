@@ -629,6 +629,10 @@ body .popup .stem--readme {
   flex: 1 1 auto;
   overflow: auto;
 }
+#toast-container > .toast-info.stem--updateNotice .stem--extensions:not(:is(.stem--hasExtensions *)),
+#toast-container > .toast-info.stem--updateNotice .stem--plugins:not(:is(.stem--hasPlugins *)) {
+  display: none;
+}
 #toast-container > .toast-info.stem--updateNotice ul {
   margin: 0;
   padding: 0 1.5em;
