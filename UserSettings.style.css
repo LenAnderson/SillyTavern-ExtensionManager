@@ -136,7 +136,7 @@
                     gap: 0.5em;
                     padding: 1.5em;
                     &:hover {
-                        background-color:hsl(from var(--SmartThemeBlurTintColor) h s calc(l * 1.25));
+                        background-color:hsl(from var(--SmartThemeBlurTintColor) h s calc(l * 1.5));
                     }
                     &.hidden {
                         display: none;
