@@ -458,6 +458,7 @@ body.stem--nonDiscord #rm_extensions_block {
 }
 .stem--tagPanel {
   display: flex;
+  display: none;
   flex-direction: row;
   gap: 1em;
   flex-wrap: wrap;
@@ -564,6 +565,7 @@ body.stem--nonDiscord #rm_extensions_block {
 }
 .stem--list .stem--item .stem--tags {
   display: flex;
+  display: none;
   flex-wrap: wrap;
   gap: 0.5em;
   padding: 0.25em;
