@@ -22,6 +22,9 @@ export class ManageExtensionsTab extends ManageItemsTab {
         'Name': 'Extension',
     };
 
+    /**@type {JQuery} */
+    reloadToast;
+
 
     constructor() {
         super();
@@ -44,9 +47,40 @@ export class ManageExtensionsTab extends ManageItemsTab {
         );
         Manager.eventSource.on(Manager.EVENT.INSTALLED_EXTENSION, async(ext)=>{
             this.renderExtensionRow(ext, (await Extension.list()).indexOf(ext) + 1);
+            this.showReloadToast();
         });
         Extension.eventSource.on(STEM_ITEM_EVENT.GIT_STATUS, async()=>{
             this.updateUpdateButton();
+        });
+        Extension.eventSource.on(STEM_ITEM_EVENT.INSTALL, ()=>{
+            this.showReloadToast();
+        });
+        Extension.eventSource.on(STEM_ITEM_EVENT.UNINSTALL, ()=>{
+            this.showReloadToast();
+        });
+        Extension.eventSource.on(STEM_ITEM_EVENT.STATE, ()=>{
+            this.showReloadToast();
+        });
+    }
+
+    showReloadToast() {
+        if (this.reloadToast) return;
+        const dom = document.createElement('div'); {
+            const mes = document.createElement('p'); {
+                mes.textContent = 'You must refresh the page to apply changes to extensions.';
+                dom.append(mes);
+            }
+            const hint = document.createElement('small'); {
+                hint.textContent = 'click to refresh';
+                dom.append(hint);
+            }
+        }
+        this.reloadToast = toastr.info(dom.outerHTML, 'Extension Manager', {
+            closeButton: false,
+            escapeHtml: false,
+            timeOut: 0,
+            extendedTimeOut: 0,
+            onclick: ()=>location.reload(),
         });
     }
 

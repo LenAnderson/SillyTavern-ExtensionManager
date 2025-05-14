@@ -49,6 +49,12 @@ export class Extension extends ExtensionManifest {
             }
             this.eventSource.emit(STEM_ITEM_EVENT.UNINSTALL, instance);
         });
+        instance.eventSource.on(STEM_ITEM_EVENT.INSTALL, ()=>{
+            this.eventSource.emit(STEM_ITEM_EVENT.INSTALL, instance);
+        });
+        instance.eventSource.on(STEM_ITEM_EVENT.STATE, ()=>{
+            this.eventSource.emit(STEM_ITEM_EVENT.STATE, instance);
+        });
         instance.eventSource.on(STEM_ITEM_EVENT.GIT_STATUS, ()=>{
             this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS, instance);
         });
@@ -239,6 +245,7 @@ export class Extension extends ExtensionManifest {
         }
         this.isModified = true;
         this.eventSource.emit(STEM_ITEM_EVENT.GIT_STATUS);
+        this.eventSource.emit(STEM_ITEM_EVENT.INSTALL);
         settings.save();
         this.isBusy = false;
     }

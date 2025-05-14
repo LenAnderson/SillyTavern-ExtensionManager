@@ -1,7 +1,7 @@
-import { event_types, eventSource, getRequestHeaders } from '../../../../script.js';
+import { event_types, eventSource } from '../../../../script.js';
 import { Popup } from '../../../popup.js';
 import { delay } from '../../../utils.js';
-import { error, log } from './lib/console.js';
+import { log } from './lib/console.js';
 import { Manager } from './src/Manager.js';
 import { Extension } from './src/Extension.js';
 import { ExtensionError } from './src/ExtensionError.js';
@@ -13,14 +13,37 @@ import { TabAction } from './src/ui/TabAction.js';
 import { TabUi } from './src/ui/TabUi.js';
 import { ManagePluginsTab } from './src/tabs/ManagePluginsTab.js';
 import { CatalogTab } from './src/tabs/CatalogTab.js';
+import { RawTab } from './src/tabs/RawTab.js';
+import { extension_settings } from '../../../extensions.js';
 
 const appReady = new Promise(resolve=>eventSource.once(event_types.APP_READY, resolve));
+
+const NAME = new URL(import.meta.url).pathname.split('/').at(-2);
+const watchCss = async()=>{
+    try {
+        const FilesPluginApi = (await import('../SillyTavern-FilesPluginApi/api.js')).FilesPluginApi;
+        // watch CSS for changes
+        const style = document.createElement('style');
+        document.body.append(style);
+        const path = [
+            '~',
+            'extensions',
+            NAME,
+            'style.css',
+        ].join('/');
+        const ev = await FilesPluginApi.watch(path, 500);
+        ev.addEventListener('message', async(mes)=>{
+            style.innerHTML = await (await FilesPluginApi.get(path)).text();
+            document.querySelector(`#third-party_${NAME}-css`)?.remove();
+        });
+    } catch { /* empty */ }
+};
 
 export const settings = new Settings();
 
 
 /**
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
 const checkDependencies = async()=>{
     const pluginTest = await fetch('/api/plugins/emp/');
@@ -38,6 +61,7 @@ const checkDependencies = async()=>{
 
 const init = async()=>{
     if (!await checkDependencies()) return;
+    watchCss();
 
     const drawer = /**@type {HTMLElement}*/(document.querySelector('#rm_extensions_block'));
     const settingsBody = /**@type {HTMLElement}*/(drawer.querySelector(':scope > .extensions_block'));
@@ -46,13 +70,6 @@ const init = async()=>{
 
     drawer.classList.add('stem--drawer');
     header.classList.add('stem--head');
-
-    // reload warning
-    const warning = document.createElement('div'); {
-        warning.classList.add('stem--reloadWarning');
-        warning.textContent = 'Reload the page to apply extension changes';
-        document.body.append(warning);
-    }
 
     // collect extension errors
     /**
@@ -68,9 +85,6 @@ const init = async()=>{
         if (ext) {
             ext.addError(new ExtensionError(Date.now(), ex.stack));
         }
-        // if (!errors[source]) errors[source] = [];
-        // errors[source].push({ time:Date.now(), stack:ex.stack });
-        // manifests.find(it=>it.name == source)?.tblRow?.setAttribute('data-stem--hasErrors', '1');
     };
     window.addEventListener('error', (evt)=>handleError(evt));
     window.addEventListener('unhandledrejection', (evt)=>handleError(evt));
@@ -138,7 +152,7 @@ const init = async()=>{
     }
     drawer.append(tabs.render());
 };
-await init();
+if (!extension_settings.disabledExtensions.includes(`third-party/${NAME}`)) await init();
 
 
 

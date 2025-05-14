@@ -1,3 +1,5 @@
+import { showLoader } from '../../../../../loader.js';
+import { delay } from '../../../../../utils.js';
 import { settings } from '../../index.js';
 import { Manager } from '../Manager.js';
 import { Plugin } from '../Plugin.js';
@@ -26,6 +28,33 @@ export class ManagePluginsTab extends ManageItemsTab {
         });
         Plugin.eventSource.on(STEM_ITEM_EVENT.GIT_STATUS, async()=>{
             this.updateUpdateButton();
+        });
+    }
+
+    showReloadToast() {
+        if (this.reloadToast) return;
+        const dom = document.createElement('div'); {
+            const mes = document.createElement('p'); {
+                mes.textContent = 'You must restart the SillyTavern server to apply changes to plugins.';
+                dom.append(mes);
+            }
+            const hint = document.createElement('small'); {
+                hint.textContent = 'click to restart';
+                dom.append(hint);
+            }
+        }
+        this.reloadToast = toastr.info(dom.outerHTML, 'Extension Manager', {
+            closeButton: false,
+            escapeHtml: false,
+            timeOut: 0,
+            extendedTimeOut: 0,
+            onclick: async()=>{
+                showLoader();
+                await fetch('/api/plugins/stem/st/restart');
+                await delay(1000);
+                while (!(await fetch('/', { method:'HEAD' })).ok) await delay(500);
+                location.reload();
+            },
         });
     }
 
