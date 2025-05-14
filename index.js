@@ -31,10 +31,11 @@ const watchCss = async()=>{
             NAME,
             'style.css',
         ].join('/');
-        const ev = await FilesPluginApi.watch(path, 500);
-        ev.addEventListener('message', async(mes)=>{
+        const ev = await FilesPluginApi.watch(path);
+        ev.addEventListener('message', async(/**@type {boolean}*/exists)=>{
+            if (!exists) return;
             style.innerHTML = await (await FilesPluginApi.get(path)).text();
-            document.querySelector(`#third-party_${NAME}-css`)?.remove();
+            document.querySelector('#third-party_SillyTavern-ChatDrawer-css')?.remove();
         });
     } catch { /* empty */ }
 };
