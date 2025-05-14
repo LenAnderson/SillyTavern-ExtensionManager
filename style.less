@@ -1,5 +1,7 @@
 @import "./UserSettings.style.css";
 
+@import (inline) url("./lib/JsonView/jsonView.css");
+
 
 
 body.stem--nonDiscord #rm_extensions_block {
@@ -624,6 +626,24 @@ body.stem--nonDiscord #rm_extensions_block {
         background: var(--SmartThemeQuoteColor);
         box-sizing: border-box;
         margin-left: 1rem;
+    }
+}
+
+
+
+
+[data-stem--tab="raw"] {
+    display: flex;
+    flex-direction: column;
+    .stem--actions {
+        flex: 0 0 auto;
+        display: flex;
+        gap: 0.5em;
+        align-items: baseline;
+    }
+    .stem--jsonPanel {
+        flex: 1 1 auto;
+        overflow: auto;
     }
 }
 

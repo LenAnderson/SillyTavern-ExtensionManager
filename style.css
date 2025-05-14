@@ -1,4 +1,119 @@
 @import "UserSettings.style.css";
+.jsonView--root {
+  --color: var(--SmartThemeBodyColor);
+  --symbol: var(--ac-style-color-symbol, rgba(115 156 211 / 1));
+  --string: var(--ac-style-color-string, rgba(190 146 122 / 1));
+  --number: var(--ac-style-color-number, rgba(188 205 170 / 1));
+  --accent: var(--lat--color-accent, var(--SmartThemeQuoteColor, #0078d4));
+  --l0: var(--ac-style-color-punctuation);
+  --l1: var(--ac-style-color-punctuationL1);
+  --l2: var(--ac-style-color-punctuationL2);
+  font-family: var(--monoFontFamily, monospace);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.jsonView--content {
+  border-left: 1px dotted rgb(from var(--color) r g b / 50%);
+  list-style: none;
+  margin: 0;
+  margin-left: 0.25em;
+  padding: 0 1.5em;
+}
+.jsonView--item {
+  align-items: start;
+}
+.jsonView--item:has(> .jsonView--isCollapsed) {
+  display: flex;
+  gap: 0.25em;
+}
+.jsonView--item:has(> .jsonView--isCollapsed) .jsonView--head::after {
+  content: '🡘';
+}
+.jsonView--item:has(> .jsonView--isCollapsed) .jsonView--content {
+  display: none;
+}
+.jsonView--item:hover:not(:has(.jsonView--item[data-type-group="complex"]:hover)) > .jsonView--content {
+  border-left-color: var(--accent);
+}
+.jsonView--item:hover:not(:has(.jsonView--item[data-type-group="complex"]:hover)) > .jsonView--head .jsonView--open,
+.jsonView--item:hover:not(:has(.jsonView--item[data-type-group="complex"]:hover)) > .jsonView--close {
+  color: var(--accent);
+  font-weight: bold;
+}
+.jsonView--head {
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+  cursor: pointer;
+}
+.jsonView--toggle::before {
+  content: '▾';
+}
+.jsonView--toggle:is(.jsonView--isCollapsed > .jsonView--toggle)::before {
+  content: '▸';
+}
+.jsonView--name {
+  font-weight: bold;
+  margin-right: 0.25em;
+}
+.jsonView--name::before {
+  content: '"';
+}
+.jsonView--name::after {
+  content: '":';
+}
+.jsonView--count {
+  opacity: 0.5;
+}
+.jsonView--count::before {
+  content: '{';
+}
+.jsonView--count::after {
+  content: '}';
+}
+.jsonView--item:has(> .jsonView--primitiveContent) {
+  display: flex;
+}
+.jsonView--item:has(> .jsonView--primitiveContent)[data-type="null"] > .jsonView--primitiveContent {
+  font-weight: bold;
+  color: var(--symbol);
+}
+.jsonView--item:has(> .jsonView--primitiveContent)[data-type="string"] > .jsonView--primitiveContent {
+  color: var(--string);
+}
+.jsonView--item:has(> .jsonView--primitiveContent)[data-type="number"] > .jsonView--primitiveContent {
+  color: var(--number);
+}
+.jsonView--open,
+.jsonView--close {
+  color: var(--l0);
+}
+.jsonView--open:where(.jsonView--content *),
+.jsonView--close:where(.jsonView--content *) {
+  color: var(--l1);
+}
+.jsonView--open:where(.jsonView--content .jsonView--content *),
+.jsonView--close:where(.jsonView--content .jsonView--content *) {
+  color: var(--l2);
+}
+.jsonView--open:where(.jsonView--content .jsonView--content .jsonView--content *),
+.jsonView--close:where(.jsonView--content .jsonView--content .jsonView--content *) {
+  color: var(--l0);
+}
+.jsonView--open:where(.jsonView--content .jsonView--content .jsonView--content .jsonView--content *),
+.jsonView--close:where(.jsonView--content .jsonView--content .jsonView--content .jsonView--content *) {
+  color: var(--l1);
+}
+.jsonView--open:where(.jsonView--content .jsonView--content .jsonView--content .jsonView--content .jsonView--content *),
+.jsonView--close:where(.jsonView--content .jsonView--content .jsonView--content .jsonView--content .jsonView--content *) {
+  color: var(--l2);
+}
+.jsonView--open:where(.jsonView--content .jsonView--content .jsonView--content .jsonView--content .jsonView--content .jsonView--content *),
+.jsonView--close:where(.jsonView--content .jsonView--content .jsonView--content .jsonView--content .jsonView--content .jsonView--content *) {
+  color: var(--color);
+}
+
 body.stem--nonDiscord #rm_extensions_block {
   width: 100vw;
   height: calc(100dvh - var(--topBarBlockSize));
@@ -527,6 +642,20 @@ body.stem--nonDiscord #rm_extensions_block {
   background: var(--SmartThemeQuoteColor);
   box-sizing: border-box;
   margin-left: 1rem;
+}
+[data-stem--tab="raw"] {
+  display: flex;
+  flex-direction: column;
+}
+[data-stem--tab="raw"] .stem--actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 0.5em;
+  align-items: baseline;
+}
+[data-stem--tab="raw"] .stem--jsonPanel {
+  flex: 1 1 auto;
+  overflow: auto;
 }
 .popup:has(.stem--readme) {
   height: auto !important;

@@ -131,12 +131,7 @@ const init = async()=>{
         tabs.addAction(action);
     }
     {
-        const tab = new Tab();
-        tab.id = 'raw';
-        tab.icon = 'pen-to-square';
-        tab.label = 'Extension settings JSON';
-        tab.title = 'Edit extension settings JSON';
-        tabs.addTab(tab, false);
+        tabs.addTab(new RawTab(), false);
     }
     {
         tabs.addTab(new ConfigTab(), false);
