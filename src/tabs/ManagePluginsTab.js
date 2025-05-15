@@ -50,7 +50,7 @@ export class ManagePluginsTab extends ManageItemsTab {
             extendedTimeOut: 0,
             onclick: async()=>{
                 showLoader();
-                await fetch('/api/plugins/stem/st/restart');
+                await fetch('/api/plugins/emp/st/restart');
                 await delay(1000);
                 while (!(await fetch('/', { method:'HEAD' })).ok) await delay(500);
                 location.reload();
