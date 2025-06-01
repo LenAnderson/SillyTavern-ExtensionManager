@@ -232,6 +232,7 @@ body.stem--nonDiscord #rm_extensions_block {
   border: 2px solid rgb(from var(--SmartThemeBorderColor) r g b / 1);
   border-top: none;
   border-radius: 0 0 6px 6px;
+  container-type: inline-size;
   height: 100%;
   overflow: auto;
 }
@@ -246,6 +247,15 @@ body.stem--nonDiscord #rm_extensions_block {
   align-items: baseline;
   background-color: var(--bgColor);
   padding: 0.25em 0.5em;
+}
+@container (max-width: 900px) {
+  .stem--filterPanel {
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+  .stem--filterPanel .stem--filterGroup:has(.stem--search .stem--label) {
+    flex-basis: 100%;
+  }
 }
 .stem--filterPanel .stem--filterGroup {
   display: flex;
