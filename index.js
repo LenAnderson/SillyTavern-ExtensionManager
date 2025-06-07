@@ -35,7 +35,7 @@ const watchCss = async()=>{
         ev.addEventListener('message', async(/**@type {boolean}*/exists)=>{
             if (!exists) return;
             style.innerHTML = await (await FilesPluginApi.get(path)).text();
-            document.querySelector('#third-party_SillyTavern-ChatDrawer-css')?.remove();
+            document.querySelector(`#third-party_${NAME}-css`)?.remove();
         });
     } catch { /* empty */ }
 };
