@@ -124,7 +124,7 @@ body.stem--nonDiscord #rm_extensions_block {
   flex-direction: column;
   padding: 0;
 }
-#rm_extensions_block[style*="display: block"] {
+#rm_extensions_block.openDrawer {
   display: flex !important;
 }
 #rm_extensions_block > .stem--head {
