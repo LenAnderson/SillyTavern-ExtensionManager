@@ -358,6 +358,17 @@ export class Plugin {
                         if (el.src.startsWith('/')) continue;//el.src = `https://github.com${el.src}`;
                         else if (el.src.startsWith(location.origin)) el.src = `${url}/${el.src.slice(location.origin.length)}`;
                     }
+                    for (const el of /**@type {HTMLElement[]}*/([...content.querySelectorAll('pre > code')])) {
+                        const name = [...el.classList].find(it=>it.startsWith('language-'));
+                        el.classList.add('hljs');
+                        if (name) {
+                            el.innerHTML = hljs.highlight(name.slice('language-'.length), el.textContent).value;
+                        } else {
+                            const result = hljs.highlightAuto(el.textContent);
+                            el.innerHTML = result.value;
+                            el.classList.add(`language-${result.language}`);
+                        }
+                    }
                 });
                 dom.append(content);
             }
